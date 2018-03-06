@@ -91,13 +91,13 @@ def initializeWorkersAndGetTotalKarbonite():
     eMap = gc.starting_map(bc.Planet.Earth)
     KarboniteNeigbouthood = [[0 for x in range(eMap.width)] for y in range(eMap.height)]
     totalKarbonite = 0
-    for y in range(eMap.height):
-        for x in range(eMap.width):
+    for x in range(eMap.width):    
+        for y in range(eMap.height):
                 for a in range(5):
                         for b in range(5):
                             if x + a - 2 >= 0 and y + b - 2 >= 0 and x + a - 2 < eMap.width and y + b - 2 < eMap.height: 
                                 location = bc.MapLocation(eMap.planet, x + a - 2, y + b - 2)
-                                KarboniteNeigbouthood[x][y] += eMap.initial_karbonite_at(location)
+                                #KarboniteNeigbouthood[x][y] += eMap.initial_karbonite_at(location)
                 totalKarbonite += eMap.initial_karbonite_at(bc.MapLocation(eMap.planet, x, y))
     return totalKarbonite
 
@@ -110,8 +110,14 @@ def runWorkerLogic(worker, unitInfo, gc):
     directions = list(bc.Direction)
     random.shuffle(directions)
 
+    if not gc.can_sense_unit(worker.workerUnitID):
+        workers.remove(worker)
+        return
+
     unitLocation = gc.unit(worker.workerUnitID).location.map_location()
     nearbyUnits = gc.sense_nearby_units(unitLocation, 2)
+
+
 
     if worker.hasPlan:
         if gc.is_move_ready(worker.workerUnitID):
