@@ -42,7 +42,14 @@ class MyPlanetMap():
         self.printMap()
         self.printKarboniteMap()
 
+<<<<<<< HEAD
 # Path class - contains stored path and can return next direction
+=======
+
+        
+
+#Path class - contains stored path and can return next direction
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
 class Path():
     def __init__(self):
         return super().__init__(**kwargs)
@@ -54,6 +61,7 @@ class Path():
     def isFinished():
         return False
 
+<<<<<<< HEAD
 # Worker class - each worker can store a path and knows if has a plan - is running along a path
 class Worker():
     def __init__(self, id):
@@ -62,6 +70,19 @@ class Worker():
         self.hasPlan = False
         self.workerUnitID = id
         self.buildsFactory = False
+=======
+#Worker class - each worker can store a path and knows if has a plan - is running along a path
+class Worker():
+    def __init__(self, id):
+        print("making worker")
+        print(id)
+        self.factoryBuildID = 0;
+        self.hasPlan = False
+        self.workerUnitID = id
+        self.buildsFactory = False
+
+
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
     
 # Class containing data about all units in current round
 class UnitInfo():
@@ -86,7 +107,11 @@ def printTimeLeft(gc):
     print("Time left: ", gc.get_time_left_ms())
 
     
+<<<<<<< HEAD
 # Initialization logic
+=======
+   #initialization logic
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
 def initializeWorkersAndGetTotalKarbonite():
     eMap = gc.starting_map(bc.Planet.Earth)
     KarboniteNeigbouthood = [[0 for x in range(eMap.width)] for y in range(eMap.height)]
@@ -95,14 +120,23 @@ def initializeWorkersAndGetTotalKarbonite():
         for x in range(eMap.width):
                 for a in range(5):
                         for b in range(5):
+<<<<<<< HEAD
                             if x + a - 2 >= 0 and y + b - 2 >= 0 and x + a - 2 < eMap.width and y + b - 2 < eMap.height: 
                                 location = bc.MapLocation(eMap.planet, x + a - 2, y + b - 2)
+=======
+                            if x+a-2>=0 and y+b-2>=0 and x+a-2 < eMap.width and y+b-2<eMap.height: 
+                                location = bc.MapLocation(eMap.planet, x+a-2, y+b-2)
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
                                 KarboniteNeigbouthood[x][y] += eMap.initial_karbonite_at(location)
                 totalKarbonite += eMap.initial_karbonite_at(bc.MapLocation(eMap.planet, x, y))
     return totalKarbonite
 
     
+<<<<<<< HEAD
 # Unit game logic
+=======
+    # Unit game logic
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
 def runWorkerLogic(worker, unitInfo, gc):
     # Current location of the unit
 
@@ -110,6 +144,10 @@ def runWorkerLogic(worker, unitInfo, gc):
     directions = list(bc.Direction)
     random.shuffle(directions)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
     unitLocation = gc.unit(worker.workerUnitID).location.map_location()
     nearbyUnits = gc.sense_nearby_units(unitLocation, 2)
 
@@ -120,6 +158,7 @@ def runWorkerLogic(worker, unitInfo, gc):
                 return
 
     if worker.buildsFactory:
+<<<<<<< HEAD
         # If the factory the worker is building is not finished, build it
         if gc.can_build(worker.workerUnitID, worker.factoryBuildID):
             gc.build(worker.workerUnitID, worker.factoryBuildID)
@@ -128,6 +167,16 @@ def runWorkerLogic(worker, unitInfo, gc):
             worker.buildsFactory = False
             print("Factory built")
             return  
+=======
+            # If the factory the worker is building is not finished, build it
+            if gc.can_build(worker.workerUnitID, worker.factoryBuildID):
+                gc.build(worker.workerUnitID, worker.factoryBuildID)
+                return
+            else:
+                worker.buildsFactory = False
+                print("Built factoory!")
+                return  
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
 
     # duplicating
     # If there are less than maxWorkers workers, then try to replicate
@@ -136,7 +185,11 @@ def runWorkerLogic(worker, unitInfo, gc):
             if gc.can_replicate(worker.workerUnitID, direction):
                 gc.replicate(worker.workerUnitID, direction)
                 for unit in gc.sense_nearby_units(unitLocation.add(direction), 0):
+<<<<<<< HEAD
                     if unit.unit_type == bc.UnitType.Worker:
+=======
+                    if unit.unit_type==bc.UnitType.Worker:
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
                         workers.append(Worker(unit.id))
                 return
 
@@ -161,7 +214,11 @@ def runWorkerLogic(worker, unitInfo, gc):
             if gc.karbonite_at(adjacentLocation) > 0:
                 if gc.can_harvest(worker.workerUnitID, direction):
                     gc.harvest(worker.workerUnitID, direction)
+<<<<<<< HEAD
                     print("Harvesting")
+=======
+                    print("harvested")
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
                     return
         except Exception as e:
             continue
@@ -173,6 +230,16 @@ def runWorkerLogic(worker, unitInfo, gc):
                 gc.move_robot(worker.workerUnitID, direction)
                 return
 
+<<<<<<< HEAD
+=======
+   
+
+   
+     
+   
+
+
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
     #repairing comes last - least important
     for nearbyUnit in nearbyUnits:
         # If there are damaged factories nearby, then try to repair them
@@ -180,6 +247,11 @@ def runWorkerLogic(worker, unitInfo, gc):
             gc.repair(worker.workerUnitID, nearbyUnit.id)
             return
     
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
     return
 
 def runKnightLogic(unit, unitInfo, gc):
@@ -282,6 +354,7 @@ def runFactoryLogic(unit, unitInfo, gc):
         return
 
     # Try to unload existing units from structure's garrison
+    directions = list(bc.Direction)
     for direction in directions:
         if gc.can_unload(unit.id, direction):
             gc.unload(unit.id, direction)
@@ -294,6 +367,7 @@ def runFactoryLogic(unit, unitInfo, gc):
             gc.produce_robot(unit.id, bc.UnitType.Knight)
             print("Producing knight")
             return
+<<<<<<< HEAD
 
     # If there are less than 5 rangers, then produce a ranger
     if unitInfo.rangerCount < 5:
@@ -306,6 +380,12 @@ def runFactoryLogic(unit, unitInfo, gc):
     if gc.can_produce_robot(unit.id, bc.UnitType.Healer): # TODO: 
         gc.produce_robot(unit.id, bc.UnitType.Healer)
         print("Producing healer")
+=======
+    # If the structure can produce a new robot, then
+    if gc.can_produce_robot(unit.id, bc.UnitType.Knight): # TODO: 
+        gc.produce_robot(unit.id, bc.UnitType.Knight)
+        print("producing robots")
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
         return
 
     return
@@ -324,6 +404,11 @@ def runEarth(gc):
 
 
     for unit in gc.my_units():
+<<<<<<< HEAD
+=======
+        #if unit.unit_type == bc.UnitType.Worker:
+        #    runWorkerLogic(unit, unitInfo, gc)
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
         if unit.unit_type == bc.UnitType.Knight:
             runKnightLogic(unit, unitInfo, gc)
         elif unit.unit_type == bc.UnitType.Ranger:
@@ -368,11 +453,20 @@ workers = []
 for unit in gc.my_units():
         if unit.unit_type == bc.UnitType.Worker:
             workers.append(Worker(unit.id))
+<<<<<<< HEAD
             print("Worker added: ", unit.id)
 
 totKarb = initializeWorkersAndGetTotalKarbonite()
 maxWorkers = totKarb / 150  #needs tweaking after testing - now /100 - that means at full workers some 33 turns to mine all without the movement
 maxFactories = totKarb / 300
+=======
+            print("added worker ")
+            print(unit.id)
+
+totKarb = initializeWorkersAndGetTotalKarbonite()
+maxWorkers = totKarb/150  #needs tweaking after testing - now /100 - that means at full workers some 33 turns to mine all without the movement
+maxFactories = totKarb/300
+>>>>>>> ec0ae829e97ee0a5281bd7b03c2ac6c4c502ed00
 
 ################
 #    UPDATE    #
