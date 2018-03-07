@@ -5,8 +5,6 @@ import traceback
 import time
 import os
 
-
-
 # Path class - contains stored path and can return next direction
 class Path():
     def __init__(self):
@@ -35,7 +33,7 @@ class UnitInfo():
         self.mageCount = self.healerCount = 0
         self.totalArmyCount = len(gc.my_units()) - len(workers)
         self.Research = bc.ResearchInfo()
-        
+
         for unit in gc.my_units():
             if (unit.unit_type == bc.UnitType.Factory):
                 self.factoryCount += 1
@@ -443,7 +441,12 @@ def runMars(gc):
 gc = bc.GameController()
 random.seed(6137)
 
-
+gc.queue_research(bc.UnitType.Worker)
+gc.queue_research(bc.UnitType.Knight)
+gc.queue_research(bc.UnitType.Ranger)
+gc.queue_research(bc.UnitType.Ranger)
+gc.queue_research(bc.UnitType.Mage)
+gc.queue_research(bc.UnitType.Rocket)
 
 #all workers will be stored
 workers = []
