@@ -68,6 +68,7 @@ class UnitInfo():
     def __init__(self, gc):
         self.factoryCount = self.workerCount = self.knightCount = self.rangerCount = 0;
         self.mageCount = self.healerCount = 0
+        self.totalArmyCount = len(gc.my_units()) - len(workers)
         for unit in gc.my_units():
             if (unit.unit_type == bc.UnitType.Factory):
                 self.factoryCount += 1
@@ -305,24 +306,25 @@ def runFactoryLogic(unit, unitInfo, gc):
             return
 
     # If there are less than 5 knights, then produce a knight
-    if unitInfo.knightCount < 5:
+    if unitInfo.knightCount < max(5, unitInfo.totalArmyCount * 0.35):
         if gc.can_produce_robot(unit.id, bc.UnitType.Knight): # TODO: 
             gc.produce_robot(unit.id, bc.UnitType.Knight)
             print("Producing knight")
             return
 
     # If there are less than 5 rangers, then produce a ranger
-    if unitInfo.rangerCount < 5:
+    if unitInfo.rangerCount < max(5, unitInfo.totalArmyCount * 0.6):
         if gc.can_produce_robot(unit.id, bc.UnitType.Ranger): # TODO: 
             gc.produce_robot(unit.id, bc.UnitType.Ranger)
             print("Producing mage")
             return
 
     # If there are less than 5 rangers, then produce a healer
-    if gc.can_produce_robot(unit.id, bc.UnitType.Healer): # TODO: 
-        gc.produce_robot(unit.id, bc.UnitType.Healer)
-        print("Producing healer")
-        return
+    if unitInfo.healerCount < unitInfo.totalArmyCount * 0.05:
+        if gc.can_produce_robot(unit.id, bc.UnitType.Healer): # TODO: 
+            gc.produce_robot(unit.id, bc.UnitType.Healer)
+            print("Producing healer")
+            return
 
     return
 
@@ -387,7 +389,7 @@ for unit in gc.my_units():
             print("Worker added: ", unit.id)
 
 totKarb = initializeWorkersAndGetTotalKarbonite()
-maxWorkers = totKarb / 150  #needs tweaking after testing - now /100 - that means at full workers some 33 turns to mine all without the movement
+maxWorkers = min(totKarb / 150, 20)  #needs tweaking after testing - now /100 - that means at full workers some 33 turns to mine all without the movement
 maxFactories = totKarb / 300
 
 ################
