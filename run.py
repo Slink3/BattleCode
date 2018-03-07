@@ -215,10 +215,8 @@ def runRangerLogic(unit, unitInfo, gc):
         enemyTeam = bc.Team.Red
         if gc.team() == bc.Team.Red:
             enemyTeam = bc.Team.Blue
-
         if not gc.is_attack_ready(unit.id):
             return
-
         for direction in directions:
             if gc.is_move_ready(unit.id):
                 if gc.can_move(unit.id, direction):
@@ -237,7 +235,6 @@ def runRangerLogic(unit, unitInfo, gc):
                 if gc.can_attack(unit.id, nearbyEnemyUnit.id):
                     gc.attack(unit.id, nearbyEnemyUnit.id)
                     return
-
         # find the location of the enemy units
         visibleEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
         for visibleEnemyUnit in visibleEnemyUnits:
@@ -266,7 +263,6 @@ def runMageLogic(unit, unitInfo, gc):
     # get the location of the unit if on the map
     if unit.location.is_on_map():
         unitLocation = unit.location.map_location()
-
         # Randomize array of directions each turn
         directions = list(bc.Direction)
         random.shuffle(directions)
@@ -302,6 +298,12 @@ def runMageLogic(unit, unitInfo, gc):
                                 if gc.can_move(unit.id, direction):
                                     gc.move_robot(unit.id, direction)
                                     return
+            # Move randomly
+            for direction in directions:
+                if gc.is_move_ready(unit.id):
+                    if gc.can_move(unit.id, direction):
+                        gc.move_robot(unit.id, direction)
+                        return
 
 
     return
