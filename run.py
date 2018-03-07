@@ -219,7 +219,6 @@ def runRangerLogic(unit, unitInfo, gc):
             return
 
         for direction in directions:
-            gc.unload(unit.id, direction)
             if gc.is_move_ready(unit.id):
                 if gc.can_move(unit.id, direction):
                     gc.move_robot(unit.id, direction)
@@ -261,7 +260,50 @@ def runRangerLogic(unit, unitInfo, gc):
     return
 
 def runMageLogic(unit, unitInfo, gc):
-    runKnightLogic(unit, unitInfo, gc) # TODO: Implement mage logic
+    # unit is till to be unloaded
+    if unit.location.is_in_garrison() or unit.location.is_in_space():
+        return
+    # get the location of the unit if on the map
+    if unit.location.is_on_map():
+        unitLocation = unit.location.map_location()
+
+        # Randomize array of directions each turn
+        directions = list(bc.Direction)
+        random.shuffle(directions)
+
+        # Get enemy team
+        enemyTeam = bc.Team.Red
+        if gc.team() == bc.Team.Red:
+            enemyTeam = bc.Team.Blue
+        # look for team members for support for fighting
+        nearbyTeamUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, gc.team())
+        for nearbyTeamUnit in nearbyTeamUnits:
+            direction = unitLocation.direction_to(nearbyTeamUnit.location.map_loaction())
+            if gc.is_move_ready(unit.id):
+                if gc.can_move(unit.id, direction):
+                    gc.move_robot(unit.id, direction)
+                    return
+            # after moving to where team members are find the appropriate place to attack
+                visibleEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
+                # check if the enemies are  in the range
+                for visibleEnemyUnit in visibleEnemyUnits:
+                    if visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit):
+                        # if enemy is in the range then attack
+                        if gc.is_attack_ready(unit.id):
+                            if gc.can_attack(unit.id, visibleEnemyUnit.id):
+                                gc.attack(unit.id, visibleEnemyUnit.id)
+                                return
+                    else:
+                        # if the unit is not in range then move closer to attack
+                        while visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit) == False:
+                            # if the visible ranger is not in the range then move towards the enemy
+                            direction = unitLocation.direction_to(visibleEnemyUnit.location.map_location())
+                            if gc.is_move_ready(unit.id):
+                                if gc.can_move(unit.id, direction):
+                                    gc.move_robot(unit.id, direction)
+                                    return
+
+
     return
 
 def runHealerLogic(unit, unitInfo, gc):
