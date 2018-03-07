@@ -260,7 +260,7 @@ def runHealerLogic(unit, unitInfo, gc):
                 gc.heal(unit.id, nearbyAlliedUnit.id)
                 return
 
-    visibleAlliedUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
+    visibleAlliedUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, gc.team())
     for visibleAlliedUnit in visibleAlliedUnits:
         # If there are visible allied units nearby, then try to move closer to them
         direction = unitLocation.direction_to(visibleAlliedUnit.location.map_location())
@@ -268,6 +268,16 @@ def runHealerLogic(unit, unitInfo, gc):
             if gc.can_move(unit.id, direction):
                 gc.move_robot(unit.id, direction)
                 return
+
+    # If there are visible enemy units nearby, just run!
+    enemies = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
+    if len(enemies) > 0:
+        enemies = sorted(enemies, key=lambda x: x.location.map_location().distance_squared_to(unitLocation))
+        enemy_loc = enemies[0].location.map_location()
+        reverseEnemyDirection = enemy_loc.direction_to(unitLocation)
+        if gc.can_move(unit.id, reverseEnemyDirection):
+            gc.move_robot(unit.id, reverseEnemyDirection)
+            return
             
     # Move randomly
     for direction in directions:
