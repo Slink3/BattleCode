@@ -5,18 +5,6 @@ import traceback
 import time
 import os
 
-# Path class - contains stored path and can return next direction
-class Path():
-    def __init__(self):
-        return super().__init__(**kwargs)
-
-    def getNextDirection():
-        directions = list(bc.Direction)
-        return random.choice(directions)
-
-    def isFinished():
-        return False
-
 # Worker class - each worker can store a path and knows if has a plan - is running along a path
 class Worker():
     def __init__(self, id):
@@ -95,7 +83,6 @@ def runWorkerLogic(worker, unitInfo, gc):
             return
         else:
             worker.buildsFactory = False
-            print("Factory built")
             return  
 
     # duplicating
@@ -471,7 +458,12 @@ def runMars(gc):
 gc = bc.GameController()
 random.seed(6137)
 
-
+gc.queue_research(bc.UnitType.Worker)
+gc.queue_research(bc.UnitType.Knight)
+gc.queue_research(bc.UnitType.Ranger)
+gc.queue_research(bc.UnitType.Ranger)
+gc.queue_research(bc.UnitType.Ranger)
+gc.queue_research(bc.UnitType.Mage)
 
 #all workers will be stored
 workers = []
