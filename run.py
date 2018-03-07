@@ -33,11 +33,9 @@ class UnitInfo():
     def __init__(self, gc):
         self.factoryCount = self.workerCount = self.knightCount = self.rangerCount = 0;
         self.mageCount = self.healerCount = 0
-<<<<<<< HEAD
         self.totalArmyCount = len(gc.my_units()) - len(workers)
-=======
         self.Research = bc.ResearchInfo()
->>>>>>> origin/master
+        
         for unit in gc.my_units():
             if (unit.unit_type == bc.UnitType.Factory):
                 self.factoryCount += 1
