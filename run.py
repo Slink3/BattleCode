@@ -197,63 +197,62 @@ def runKnightLogic(unit, unitInfo, gc):
 
 def runRangerLogic(unit, unitInfo, gc):
     # unit is till to be unloaded
-    if unit.location.is_in_garrison() or unit.location.is_in_space():
+    if unit.location.is_in_garrison() or unit.location.is_in_space() or not unit.location.is_on_map():
         return
-    # get the location of the unit
-    if unit.location.is_on_map():
-        unitLocation = unit.location.map_location()
+    
+    unitLocation = unit.location.map_location()
 
-        # Randomize array of directions each turn
-        directions = list(bc.Direction)
-        random.shuffle(directions)
+    # Randomize array of directions each turn
+    directions = list(bc.Direction)
+    random.shuffle(directions)
 
-        # Get enemy team
-        enemyTeam = bc.Team.Red
-        if gc.team() == bc.Team.Red:
-            enemyTeam = bc.Team.Blue
+    # Get enemy team
+    enemyTeam = bc.Team.Red
+    if gc.team() == bc.Team.Red:
+        enemyTeam = bc.Team.Blue
 
-        if not gc.is_attack_ready(unit.id):
-            return
+    if not gc.is_attack_ready(unit.id): # TODO: Improve what to do if cooldown
+        return
 
-        for direction in directions:
-            if gc.is_move_ready(unit.id):
-                if gc.can_move(unit.id, direction):
-                    gc.move_robot(unit.id, direction)
-                    return
-
-        # get the closest units
-        nearbyEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.attack_range(), enemyTeam)
-        for nearbyEnemyUnit in nearbyEnemyUnits:
-            if gc.is_attack_ready(unit.id):
-                # if are on the level of sniping we can snipe
-                if unitInfo.Research.get_level(bc.UnitType.Ranger) > 2:
-                    if gc.can_attack(unit.id, nearbyEnemyUnit.id):
-                        gc.can_begin_snipe(unit.id, nearbyEnemyUnit)
-                        return
-                # else we just do a regular attack
+    # get the closest units
+    nearbyEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.attack_range(), enemyTeam)
+    for nearbyEnemyUnit in nearbyEnemyUnits:
+        if gc.is_attack_ready(unit.id):
+            # if are on the level of sniping we can snipe
+            if unitInfo.Research.get_level(bc.UnitType.Ranger) > 2:
                 if gc.can_attack(unit.id, nearbyEnemyUnit.id):
-                    gc.attack(unit.id, nearbyEnemyUnit.id)
+                    gc.can_begin_snipe(unit.id, nearbyEnemyUnit)
                     return
-
-        # find the location of the enemy units
-        visibleEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
-        for visibleEnemyUnit in visibleEnemyUnits:
-            # check if the enemies are  in the range
-            if visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location):
-                # if enemy is in the range then attack
-                if gc.is_attack_ready(unit.id):
-                    if gc.can_attack(unit.id, visibleEnemyUnit.id):
-                        gc.attack(unit.id, visibleEnemyUnit.id)
+            # else we just do a regular attack
+            if gc.can_attack(unit.id, nearbyEnemyUnit.id):
+                gc.attack(unit.id, nearbyEnemyUnit.id)
+                return
+    # find the location of the enemy units
+    visibleEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
+    for visibleEnemyUnit in visibleEnemyUnits:
+        # check if the enemies are  in the range
+        if visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location):
+            # if enemy is in the range then attack
+            if gc.is_attack_ready(unit.id):
+                if gc.can_attack(unit.id, visibleEnemyUnit.id):
+                    gc.attack(unit.id, visibleEnemyUnit.id)
+                    return
+        else:
+            # if the unit is not in range then move closer to attack
+            while visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location) == False:
+                # if the visible ranger is not in the range then move towards the enemy
+                direction = unitLocation.direction_to(visibleEnemyUnit.location.map_location())
+                if gc.is_move_ready(unit.id):
+                    if gc.can_move(unit.id, direction):
+                        gc.move_robot(unit.id, direction)
                         return
-            else:
-                # if the unit is not in range then move closer to attack
-                while visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location) == False:
-                    # if the visible ranger is not in the range then move towards the enemy
-                    direction = unitLocation.direction_to(visibleEnemyUnit.location.map_location())
-                    if gc.is_move_ready(unit.id):
-                        if gc.can_move(unit.id, direction):
-                            gc.move_robot(unit.id, direction)
-                            return
+
+    for direction in directions:
+        if gc.is_move_ready(unit.id):
+            if gc.can_move(unit.id, direction):
+                gc.move_robot(unit.id, direction)
+                return
+            
     return
 
 def runMageLogic(unit, unitInfo, gc):
@@ -263,7 +262,6 @@ def runMageLogic(unit, unitInfo, gc):
     # get the location of the unit if on the map
     if unit.location.is_on_map():
         unitLocation = unit.location.map_location()
-
         # Randomize array of directions each turn
         directions = list(bc.Direction)
         random.shuffle(directions)
@@ -275,7 +273,7 @@ def runMageLogic(unit, unitInfo, gc):
         # look for team members for support for fighting
         nearbyTeamUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, gc.team())
         for nearbyTeamUnit in nearbyTeamUnits:
-            direction = unitLocation.direction_to(nearbyTeamUnit.location.map_loaction())
+            direction = unitLocation.direction_to(nearbyTeamUnit.location.map_location())
             if gc.is_move_ready(unit.id):
                 if gc.can_move(unit.id, direction):
                     gc.move_robot(unit.id, direction)
@@ -299,6 +297,12 @@ def runMageLogic(unit, unitInfo, gc):
                                 if gc.can_move(unit.id, direction):
                                     gc.move_robot(unit.id, direction)
                                     return
+            # Move randomly
+            for direction in directions:
+                if gc.is_move_ready(unit.id):
+                    if gc.can_move(unit.id, direction):
+                        gc.move_robot(unit.id, direction)
+                        return
 
 
     return
@@ -375,9 +379,16 @@ def runFactoryLogic(unit, unitInfo, gc):
             return
 
     # If there are less than 5 rangers, then produce a ranger
-    if unitInfo.rangerCount < max(5, unitInfo.totalArmyCount * 0.6):
+    if unitInfo.rangerCount < max(5, unitInfo.totalArmyCount * 0.45):
         if gc.can_produce_robot(unit.id, bc.UnitType.Ranger): # TODO: 
             gc.produce_robot(unit.id, bc.UnitType.Ranger)
+            print("Producing ranger")
+            return
+
+    # If there are less than 5 mage, then produce a mage
+    if unitInfo.mageCount < max(5, unitInfo.totalArmyCount * 0.15):
+        if gc.can_produce_robot(unit.id, bc.UnitType.Mage):
+            gc.produce_robot(unit.id, bc.UnitType.Mage)
             print("Producing mage")
             return
 
@@ -450,6 +461,15 @@ for unit in gc.my_units():
 totKarb = initializeWorkersAndGetTotalKarbonite()
 maxWorkers = min(totKarb / 150, 20)  #needs tweaking after testing - now /100 - that means at full workers some 33 turns to mine all without the movement
 maxFactories = totKarb / 300
+
+gc.queue_research(bc.UnitType.Worker)
+gc.queue_research(bc.UnitType.Knight)
+gc.queue_research(bc.UnitType.Ranger)
+gc.queue_research(bc.UnitType.Ranger)
+gc.queue_research(bc.UnitType.Ranger)
+gc.queue_research(bc.UnitType.Mage)
+# gc.queue_research(bc.UnitType.Rocket) # TODO: We don't have a rocket yet.
+gc.queue_research(bc.UnitType.Healer)
 
 ################
 #    UPDATE    #
