@@ -5,42 +5,7 @@ import traceback
 import time
 import os
 
-# Class containing initial data about planet map (passable terrain, karbonite)
-class MyPlanetMap():
-    def __init__(self, planetMap):
-        self.width = planetMap.width
-        self.height = planetMap.height
-        self.map = [[0 for x in range(self.width)] for y in range(self.height)]
-        self.karboniteMap = [[0 for x in range(self.width)] for y in range(self.height)]
 
-        for y in range(self.height):
-            for x in range(self.width):
-                location = bc.MapLocation(planetMap.planet, x, y)
-                if (planetMap.is_passable_terrain_at(location)): 
-                    self.map[x][self.width - 1 - y] = 1
-                else:
-                    self.map[x][self.width - 1 - y] = 0
-                self.karboniteMap[x][self.width - 1 - y] = planetMap.initial_karbonite_at(location)
-
-    def printMap(self):
-        print("Printing map:")
-        for y in range(self.height):
-            mapString = ''
-            for x in range(self.width):
-                mapString += format(self.map[x][y], '2d')
-            print(mapString)
-
-    def printKarboniteMap(self):
-        print("Printing Karbonite map:")
-        for y in range(self.height):
-            mapString = ''
-            for x in range(self.width):
-                mapString += format(self.karboniteMap[x][y], '2d')
-            print(mapString)
-
-    def printMaps(self):
-        self.printMap()
-        self.printKarboniteMap()
 
 # Path class - contains stored path and can return next direction
 class Path():
@@ -433,10 +398,7 @@ def runMars(gc):
 gc = bc.GameController()
 random.seed(6137)
 
-earthMap = MyPlanetMap(gc.starting_map(bc.Planet.Earth)) # TODO: Maybe redundant
-marsMap = MyPlanetMap(gc.starting_map(bc.Planet.Mars)) # TODO: Maybe redundant
 
-#earthMap.printKarboniteMap()
 
 #all workers will be stored
 workers = []
