@@ -376,9 +376,16 @@ def runFactoryLogic(unit, unitInfo, gc):
             return
 
     # If there are less than 5 rangers, then produce a ranger
-    if unitInfo.rangerCount < max(5, unitInfo.totalArmyCount * 0.6):
+    if unitInfo.rangerCount < max(5, unitInfo.totalArmyCount * 0.45):
         if gc.can_produce_robot(unit.id, bc.UnitType.Ranger): # TODO: 
             gc.produce_robot(unit.id, bc.UnitType.Ranger)
+            print("Producing ranger")
+            return
+
+    # If there are less than 5 mage, then produce a mage
+    if unitInfo.mageCount < max(5, unitInfo.totalArmyCount * 0.15):
+        if gc.can_produce_robot(unit.id, bc.UnitType.Mage):
+            gc.produce_robot(unit.id, bc.UnitType.Mage)
             print("Producing mage")
             return
 
