@@ -33,11 +33,8 @@ class UnitInfo():
     def __init__(self, gc):
         self.factoryCount = self.workerCount = self.knightCount = self.rangerCount = 0;
         self.mageCount = self.healerCount = 0
-<<<<<<< HEAD
         self.totalArmyCount = len(gc.my_units()) - len(workers)
-=======
         self.Research = bc.ResearchInfo()
->>>>>>> origin/master
         for unit in gc.my_units():
             if (unit.unit_type == bc.UnitType.Factory):
                 self.factoryCount += 1
@@ -227,9 +224,8 @@ def runRangerLogic(unit, unitInfo, gc):
                 if gc.can_move(unit.id, direction):
                     gc.move_robot(unit.id, direction)
                     return
-
         # get the closest units
-        nearbyEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.attack_range, enemyTeam)
+        nearbyEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.attack_range(), enemyTeam)
         for nearbyEnemyUnit in nearbyEnemyUnits:
             if gc.is_attack_ready(unit.id):
                 # if are on the level of sniping we can snipe
@@ -246,7 +242,7 @@ def runRangerLogic(unit, unitInfo, gc):
         visibleEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
         for visibleEnemyUnit in visibleEnemyUnits:
             # check if the enemies are  in the range
-            if visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit):
+            if visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location):
                 # if enemy is in the range then attack
                 if gc.is_attack_ready(unit.id):
                     if gc.can_attack(unit.id, visibleEnemyUnit.id):
@@ -254,7 +250,7 @@ def runRangerLogic(unit, unitInfo, gc):
                         return
             else:
                 # if the unit is not in range then move closer to attack
-                while visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit) == False:
+                while visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location) == False:
                     # if the visible ranger is not in the range then move towards the enemy
                     direction = unitLocation.direction_to(visibleEnemyUnit.location.map_location())
                     if gc.is_move_ready(unit.id):
@@ -291,7 +287,7 @@ def runMageLogic(unit, unitInfo, gc):
                 visibleEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
                 # check if the enemies are  in the range
                 for visibleEnemyUnit in visibleEnemyUnits:
-                    if visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit):
+                    if visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location):
                         # if enemy is in the range then attack
                         if gc.is_attack_ready(unit.id):
                             if gc.can_attack(unit.id, visibleEnemyUnit.id):
@@ -299,7 +295,7 @@ def runMageLogic(unit, unitInfo, gc):
                                 return
                     else:
                         # if the unit is not in range then move closer to attack
-                        while visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit) == False:
+                        while visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location) == False:
                             # if the visible ranger is not in the range then move towards the enemy
                             direction = unitLocation.direction_to(visibleEnemyUnit.location.map_location())
                             if gc.is_move_ready(unit.id):
