@@ -206,6 +206,7 @@ def runRangerLogic(unit, unitInfo, gc):
     directions = list(bc.Direction)
     random.shuffle(directions)
 
+<<<<<<< HEAD
     # Get enemy team
     enemyTeam = bc.Team.Red
     if gc.team() == bc.Team.Red:
@@ -233,10 +234,27 @@ def runRangerLogic(unit, unitInfo, gc):
         # check if the enemies are  in the range
         if visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location):
             # if enemy is in the range then attack
+=======
+        # Get enemy team
+        enemyTeam = bc.Team.Red
+        if gc.team() == bc.Team.Red:
+            enemyTeam = bc.Team.Blue
+        if not gc.is_attack_ready(unit.id):
+            return
+        for direction in directions:
+            if gc.is_move_ready(unit.id):
+                if gc.can_move(unit.id, direction):
+                    gc.move_robot(unit.id, direction)
+                    return
+        # get the closest units
+        nearbyEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.attack_range(), enemyTeam)
+        for nearbyEnemyUnit in nearbyEnemyUnits:
+>>>>>>> 4f698e74525ef8ece4e8e9a09ce9f43f0371ced2
             if gc.is_attack_ready(unit.id):
                 if gc.can_attack(unit.id, visibleEnemyUnit.id):
                     gc.attack(unit.id, visibleEnemyUnit.id)
                     return
+<<<<<<< HEAD
         else:
             # if the unit is not in range then move closer to attack
             while visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location) == False:
@@ -245,6 +263,17 @@ def runRangerLogic(unit, unitInfo, gc):
                 if gc.is_move_ready(unit.id):
                     if gc.can_move(unit.id, direction):
                         gc.move_robot(unit.id, direction)
+=======
+        # find the location of the enemy units
+        visibleEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
+        for visibleEnemyUnit in visibleEnemyUnits:
+            # check if the enemies are  in the range
+            if visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location):
+                # if enemy is in the range then attack
+                if gc.is_attack_ready(unit.id):
+                    if gc.can_attack(unit.id, visibleEnemyUnit.id):
+                        gc.attack(unit.id, visibleEnemyUnit.id)
+>>>>>>> 4f698e74525ef8ece4e8e9a09ce9f43f0371ced2
                         return
 
     for direction in directions:
