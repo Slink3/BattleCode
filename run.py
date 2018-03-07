@@ -29,11 +29,10 @@ class Worker():
 # Class containing data about all units in current round
 class UnitInfo():
     def __init__(self, gc):
-        self.factoryCount = self.workerCount = self.knightCount = self.rangerCount = 0;
+        self.factoryCount = self.workerCount = self.knightCount = self.rangerCount = 0
         self.mageCount = self.healerCount = 0
         self.totalArmyCount = len(gc.my_units()) - len(workers)
         self.Research = bc.ResearchInfo()
-
         for unit in gc.my_units():
             if (unit.unit_type == bc.UnitType.Factory):
                 self.factoryCount += 1
@@ -82,8 +81,6 @@ def runWorkerLogic(worker, unitInfo, gc):
 
     unitLocation = gc.unit(worker.workerUnitID).location.map_location()
     nearbyUnits = gc.sense_nearby_units(unitLocation, 2)
-
-
 
     if worker.hasPlan:
         if gc.is_move_ready(worker.workerUnitID):
@@ -225,7 +222,7 @@ def runRangerLogic(unit, unitInfo, gc):
                     return
 
         # get the closest units
-        nearbyEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.attack_range, enemyTeam)
+        nearbyEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.attack_range(), enemyTeam)
         for nearbyEnemyUnit in nearbyEnemyUnits:
             if gc.is_attack_ready(unit.id):
                 # if are on the level of sniping we can snipe
@@ -242,7 +239,7 @@ def runRangerLogic(unit, unitInfo, gc):
         visibleEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
         for visibleEnemyUnit in visibleEnemyUnits:
             # check if the enemies are  in the range
-            if visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit):
+            if visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location):
                 # if enemy is in the range then attack
                 if gc.is_attack_ready(unit.id):
                     if gc.can_attack(unit.id, visibleEnemyUnit.id):
@@ -250,7 +247,7 @@ def runRangerLogic(unit, unitInfo, gc):
                         return
             else:
                 # if the unit is not in range then move closer to attack
-                while visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit) == False:
+                while visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location) == False:
                     # if the visible ranger is not in the range then move towards the enemy
                     direction = unitLocation.direction_to(visibleEnemyUnit.location.map_location())
                     if gc.is_move_ready(unit.id):
@@ -287,7 +284,7 @@ def runMageLogic(unit, unitInfo, gc):
                 visibleEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
                 # check if the enemies are  in the range
                 for visibleEnemyUnit in visibleEnemyUnits:
-                    if visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit):
+                    if visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location):
                         # if enemy is in the range then attack
                         if gc.is_attack_ready(unit.id):
                             if gc.can_attack(unit.id, visibleEnemyUnit.id):
@@ -295,7 +292,7 @@ def runMageLogic(unit, unitInfo, gc):
                                 return
                     else:
                         # if the unit is not in range then move closer to attack
-                        while visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit) == False:
+                        while visibleEnemyUnit.location.is_within_range(unit.attack_range(), visibleEnemyUnit.location) == False:
                             # if the visible ranger is not in the range then move towards the enemy
                             direction = unitLocation.direction_to(visibleEnemyUnit.location.map_location())
                             if gc.is_move_ready(unit.id):
@@ -378,20 +375,13 @@ def runFactoryLogic(unit, unitInfo, gc):
             return
 
     # If there are less than 5 rangers, then produce a ranger
-    if unitInfo.rangerCount < max(5, unitInfo.totalArmyCount * 0.45):
+    if unitInfo.rangerCount < max(5, unitInfo.totalArmyCount * 0.6):
         if gc.can_produce_robot(unit.id, bc.UnitType.Ranger): # TODO: 
             gc.produce_robot(unit.id, bc.UnitType.Ranger)
             print("Producing mage")
             return
 
-    # If there are less than 5 mage, then produce a mage
-    if unitInfo.mageCount < max(5, unitInfo.totalArmyCount * 0.15):
-        if gc.can_produce_robot(unit.id, bc.UnitType.Mage):
-            gc.produce_robot(unit.id, bc.UnitType.Mage)
-            print("Producing mage")
-            return
-
-    # produce healers
+    # If there are less than 5 rangers, then produce a healer
     if unitInfo.healerCount < unitInfo.totalArmyCount * 0.05:
         if gc.can_produce_robot(unit.id, bc.UnitType.Healer): # TODO: 
             gc.produce_robot(unit.id, bc.UnitType.Healer)
@@ -448,12 +438,7 @@ def runMars(gc):
 gc = bc.GameController()
 random.seed(6137)
 
-gc.queue_research(bc.UnitType.Worker)
-gc.queue_research(bc.UnitType.Knight)
-gc.queue_research(bc.UnitType.Ranger)
-gc.queue_research(bc.UnitType.Ranger)
-gc.queue_research(bc.UnitType.Mage)
-gc.queue_research(bc.UnitType.Rocket)
+
 
 #all workers will be stored
 workers = []
