@@ -5,8 +5,6 @@ import traceback
 import time
 import os
 
-
-
 # Path class - contains stored path and can return next direction
 class Path():
     def __init__(self):
@@ -31,7 +29,7 @@ class Worker():
 # Class containing data about all units in current round
 class UnitInfo():
     def __init__(self, gc):
-        self.factoryCount = self.workerCount = self.knightCount = self.rangerCount = 0;
+        self.factoryCount = self.workerCount = self.knightCount = self.rangerCount = 0
         self.mageCount = self.healerCount = 0
         self.totalArmyCount = len(gc.my_units()) - len(workers)
         self.Research = bc.ResearchInfo()
@@ -83,8 +81,6 @@ def runWorkerLogic(worker, unitInfo, gc):
 
     unitLocation = gc.unit(worker.workerUnitID).location.map_location()
     nearbyUnits = gc.sense_nearby_units(unitLocation, 2)
-
-
 
     if worker.hasPlan:
         if gc.is_move_ready(worker.workerUnitID):
