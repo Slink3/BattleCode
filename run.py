@@ -433,13 +433,6 @@ def runMars(gc):
 gc = bc.GameController()
 random.seed(6137)
 
-gc.queue_research(bc.UnitType.Worker)
-gc.queue_research(bc.UnitType.Knight)
-gc.queue_research(bc.UnitType.Ranger)
-gc.queue_research(bc.UnitType.Ranger)
-gc.queue_research(bc.UnitType.Ranger)
-gc.queue_research(bc.UnitType.Mage)
-
 #all workers will be stored
 workers = []
 for unit in gc.my_units():
