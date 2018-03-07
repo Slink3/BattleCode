@@ -5,42 +5,7 @@ import traceback
 import time
 import os
 
-# Class containing initial data about planet map (passable terrain, karbonite)
-class MyPlanetMap():
-    def __init__(self, planetMap):
-        self.width = planetMap.width
-        self.height = planetMap.height
-        self.map = [[0 for x in range(self.width)] for y in range(self.height)]
-        self.karboniteMap = [[0 for x in range(self.width)] for y in range(self.height)]
 
-        for y in range(self.height):
-            for x in range(self.width):
-                location = bc.MapLocation(planetMap.planet, x, y)
-                if (planetMap.is_passable_terrain_at(location)): 
-                    self.map[x][self.width - 1 - y] = 1
-                else:
-                    self.map[x][self.width - 1 - y] = 0
-                self.karboniteMap[x][self.width - 1 - y] = planetMap.initial_karbonite_at(location)
-
-    def printMap(self):
-        print("Printing map:")
-        for y in range(self.height):
-            mapString = ''
-            for x in range(self.width):
-                mapString += format(self.map[x][y], '2d')
-            print(mapString)
-
-    def printKarboniteMap(self):
-        print("Printing Karbonite map:")
-        for y in range(self.height):
-            mapString = ''
-            for x in range(self.width):
-                mapString += format(self.karboniteMap[x][y], '2d')
-            print(mapString)
-
-    def printMaps(self):
-        self.printMap()
-        self.printKarboniteMap()
 
 # Path class - contains stored path and can return next direction
 class Path():
@@ -68,7 +33,11 @@ class UnitInfo():
     def __init__(self, gc):
         self.factoryCount = self.workerCount = self.knightCount = self.rangerCount = 0;
         self.mageCount = self.healerCount = 0
+<<<<<<< HEAD
         self.totalArmyCount = len(gc.my_units()) - len(workers)
+=======
+        self.Research = bc.ResearchInfo()
+>>>>>>> origin/master
         for unit in gc.my_units():
             if (unit.unit_type == bc.UnitType.Factory):
                 self.factoryCount += 1
@@ -234,11 +203,111 @@ def runKnightLogic(unit, unitInfo, gc):
     return
 
 def runRangerLogic(unit, unitInfo, gc):
-    runKnightLogic(unit, unitInfo, gc) # TODO: Implement ranger logic
+    # unit is till to be unloaded
+    if unit.location.is_in_garrison() or unit.location.is_in_space():
+        return
+    # get the location of the unit
+    if unit.location.is_on_map():
+        unitLocation = unit.location.map_location()
+
+        # Randomize array of directions each turn
+        directions = list(bc.Direction)
+        random.shuffle(directions)
+
+        # Get enemy team
+        enemyTeam = bc.Team.Red
+        if gc.team() == bc.Team.Red:
+            enemyTeam = bc.Team.Blue
+
+        if not gc.is_attack_ready(unit.id):
+            return
+
+        for direction in directions:
+            if gc.is_move_ready(unit.id):
+                if gc.can_move(unit.id, direction):
+                    gc.move_robot(unit.id, direction)
+                    return
+
+        # get the closest units
+        nearbyEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.attack_range, enemyTeam)
+        for nearbyEnemyUnit in nearbyEnemyUnits:
+            if gc.is_attack_ready(unit.id):
+                # if are on the level of sniping we can snipe
+                if unitInfo.Research.get_level(bc.UnitType.Ranger) > 2:
+                    if gc.can_attack(unit.id, nearbyEnemyUnit.id):
+                        gc.can_begin_snipe(unit.id, nearbyEnemyUnit)
+                        return
+                # else we just do a regular attack
+                if gc.can_attack(unit.id, nearbyEnemyUnit.id):
+                    gc.attack(unit.id, nearbyEnemyUnit.id)
+                    return
+
+        # find the location of the enemy units
+        visibleEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
+        for visibleEnemyUnit in visibleEnemyUnits:
+            # check if the enemies are  in the range
+            if visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit):
+                # if enemy is in the range then attack
+                if gc.is_attack_ready(unit.id):
+                    if gc.can_attack(unit.id, visibleEnemyUnit.id):
+                        gc.attack(unit.id, visibleEnemyUnit.id)
+                        return
+            else:
+                # if the unit is not in range then move closer to attack
+                while visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit) == False:
+                    # if the visible ranger is not in the range then move towards the enemy
+                    direction = unitLocation.direction_to(visibleEnemyUnit.location.map_location())
+                    if gc.is_move_ready(unit.id):
+                        if gc.can_move(unit.id, direction):
+                            gc.move_robot(unit.id, direction)
+                            return
     return
 
 def runMageLogic(unit, unitInfo, gc):
-    runKnightLogic(unit, unitInfo, gc) # TODO: Implement mage logic
+    # unit is till to be unloaded
+    if unit.location.is_in_garrison() or unit.location.is_in_space():
+        return
+    # get the location of the unit if on the map
+    if unit.location.is_on_map():
+        unitLocation = unit.location.map_location()
+
+        # Randomize array of directions each turn
+        directions = list(bc.Direction)
+        random.shuffle(directions)
+
+        # Get enemy team
+        enemyTeam = bc.Team.Red
+        if gc.team() == bc.Team.Red:
+            enemyTeam = bc.Team.Blue
+        # look for team members for support for fighting
+        nearbyTeamUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, gc.team())
+        for nearbyTeamUnit in nearbyTeamUnits:
+            direction = unitLocation.direction_to(nearbyTeamUnit.location.map_loaction())
+            if gc.is_move_ready(unit.id):
+                if gc.can_move(unit.id, direction):
+                    gc.move_robot(unit.id, direction)
+                    return
+            # after moving to where team members are find the appropriate place to attack
+                visibleEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
+                # check if the enemies are  in the range
+                for visibleEnemyUnit in visibleEnemyUnits:
+                    if visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit):
+                        # if enemy is in the range then attack
+                        if gc.is_attack_ready(unit.id):
+                            if gc.can_attack(unit.id, visibleEnemyUnit.id):
+                                gc.attack(unit.id, visibleEnemyUnit.id)
+                                return
+                    else:
+                        # if the unit is not in range then move closer to attack
+                        while visibleEnemyUnit.location.is_within_range(unit.attack_range, visibleEnemyUnit) == False:
+                            # if the visible ranger is not in the range then move towards the enemy
+                            direction = unitLocation.direction_to(visibleEnemyUnit.location.map_location())
+                            if gc.is_move_ready(unit.id):
+                                if gc.can_move(unit.id, direction):
+                                    gc.move_robot(unit.id, direction)
+                                    return
+
+
     return
 
 def runHealerLogic(unit, unitInfo, gc):
@@ -376,10 +445,7 @@ def runMars(gc):
 gc = bc.GameController()
 random.seed(6137)
 
-earthMap = MyPlanetMap(gc.starting_map(bc.Planet.Earth)) # TODO: Maybe redundant
-marsMap = MyPlanetMap(gc.starting_map(bc.Planet.Mars)) # TODO: Maybe redundant
 
-#earthMap.printKarboniteMap()
 
 #all workers will be stored
 workers = []
