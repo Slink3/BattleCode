@@ -200,11 +200,6 @@ def runRangerLogic(unit, unitInfo, gc):
             enemyTeam = bc.Team.Blue
         if not gc.is_attack_ready(unit.id):
             return
-        for direction in directions:
-            if gc.is_move_ready(unit.id):
-                if gc.can_move(unit.id, direction):
-                    gc.move_robot(unit.id, direction)
-                    return
         # get the closest units
         nearbyEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.attack_range(), enemyTeam)
         for nearbyEnemyUnit in nearbyEnemyUnits:
@@ -237,6 +232,13 @@ def runRangerLogic(unit, unitInfo, gc):
                         if gc.can_move(unit.id, direction):
                             gc.move_robot(unit.id, direction)
                             return
+        
+        for direction in directions:
+            if gc.is_move_ready(unit.id):
+                if gc.can_move(unit.id, direction):
+                    gc.move_robot(unit.id, direction)
+                    return
+
     return
 
 def runMageLogic(unit, unitInfo, gc):
@@ -281,13 +283,12 @@ def runMageLogic(unit, unitInfo, gc):
                                 if gc.can_move(unit.id, direction):
                                     gc.move_robot(unit.id, direction)
                                     return
-            # Move randomly
-            for direction in directions:
-                if gc.is_move_ready(unit.id):
-                    if gc.can_move(unit.id, direction):
-                        gc.move_robot(unit.id, direction)
-                        return
-
+        # Move randomly
+        for direction in directions:
+            if gc.is_move_ready(unit.id):
+                if gc.can_move(unit.id, direction):
+                    gc.move_robot(unit.id, direction)
+                    return
 
     return
 
