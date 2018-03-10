@@ -5,6 +5,7 @@ import traceback
 import time
 import os
 import rocket
+import move
 
 # Worker class - each worker can store a path and knows if has a plan - is running along a path
 class Worker():
@@ -76,7 +77,8 @@ def runWorkerLogic(worker, unitInfo, gc):
     if worker.hasPlan:
         if gc.is_move_ready(worker.workerUnitID):
             if gc.can_move(worker.workerUnitID, direction):
-                gc.move_robot(worker.workerUnitID, direction)
+                #gc.move_robot(worker.workerUnitID, direction)
+                move.goto(gc, worker.workerUnitID, unitLocation.add(direction))
                 return
 
     if worker.buildsFactory:
@@ -141,7 +143,8 @@ def runWorkerLogic(worker, unitInfo, gc):
     for direction in directions:
         if gc.is_move_ready(worker.workerUnitID):
             if gc.can_move(worker.workerUnitID, direction):
-                gc.move_robot(worker.workerUnitID, direction)
+                #gc.move_robot(worker.workerUnitID, direction)
+                move.goto(gc, worker.workerUnitID, unitLocation.add(direction))
                 return
 
     #repairing comes last - least important
@@ -185,14 +188,16 @@ def runKnightLogic(unit, unitInfo, gc):
         direction = unitLocation.direction_to(visibleEnemyUnit.location.map_location())
         if gc.is_move_ready(unit.id):
             if gc.can_move(unit.id, direction):
-                gc.move_robot(unit.id, direction)
+                #gc.move_robot(unit.id, direction)
+                move.goto(gc, unit.id, unitLocation.add(direction))
                 return
             
     # Move randomly
     for direction in directions:
         if gc.is_move_ready(unit.id):
             if gc.can_move(unit.id, direction):
-                gc.move_robot(unit.id, direction)
+                #gc.move_robot(unit.id, direction)
+                move.goto(gc, unit.id, unitLocation.add(direction))
                 return
 
     return
@@ -245,13 +250,15 @@ def runRangerLogic(unit, unitInfo, gc):
                     direction = unitLocation.direction_to(visibleEnemyUnit.location.map_location())
                     if gc.is_move_ready(unit.id):
                         if gc.can_move(unit.id, direction):
-                            gc.move_robot(unit.id, direction)
+                            #gc.move_robot(unit.id, direction)
+                            move.goto(gc, unit.id, unitLocation.add(direction))
                             return
         
         for direction in directions:
             if gc.is_move_ready(unit.id):
                 if gc.can_move(unit.id, direction):
-                    gc.move_robot(unit.id, direction)
+                    #gc.move_robot(unit.id, direction)
+                    move.goto(gc, unit.id, unitLocation.add(direction))
                     return
 
     return
@@ -277,7 +284,8 @@ def runMageLogic(unit, unitInfo, gc):
             direction = unitLocation.direction_to(nearbyTeamUnit.location.map_location())
             if gc.is_move_ready(unit.id):
                 if gc.can_move(unit.id, direction):
-                    gc.move_robot(unit.id, direction)
+                    #gc.move_robot(unit.id, direction)
+                    move.goto(gc, unit.id, unitLocation.add(direction))
                     return
             # after moving to where team members are find the appropriate place to attack
                 visibleEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, enemyTeam)
@@ -296,13 +304,15 @@ def runMageLogic(unit, unitInfo, gc):
                             direction = unitLocation.direction_to(visibleEnemyUnit.location.map_location())
                             if gc.is_move_ready(unit.id):
                                 if gc.can_move(unit.id, direction):
-                                    gc.move_robot(unit.id, direction)
+                                    #gc.move_robot(unit.id, direction)
+                                    move.goto(gc, unit.id, unitLocation.add(direction))
                                     return
         # Move randomly
         for direction in directions:
             if gc.is_move_ready(unit.id):
                 if gc.can_move(unit.id, direction):
-                    gc.move_robot(unit.id, direction)
+                    #gc.move_robot(unit.id, direction)
+                    move.goto(gc, unit.id, unitLocation.add(direction))
                     return
 
     return
@@ -333,7 +343,8 @@ def runHealerLogic(unit, unitInfo, gc):
         direction = unitLocation.direction_to(visibleAlliedUnit.location.map_location())
         if gc.is_move_ready(unit.id):
             if gc.can_move(unit.id, direction):
-                gc.move_robot(unit.id, direction)
+                #gc.move_robot(unit.id, direction)
+                move.goto(gc, unit.id, unitLocation.add(direction))
                 return
 
     # If there are visible enemy units nearby, just run!
@@ -343,14 +354,16 @@ def runHealerLogic(unit, unitInfo, gc):
         enemy_loc = enemies[0].location.map_location()
         reverseEnemyDirection = enemy_loc.direction_to(unitLocation)
         if gc.can_move(unit.id, reverseEnemyDirection):
-            gc.move_robot(unit.id, reverseEnemyDirection)
+            #gc.move_robot(unit.id, reverseEnemyDirection)
+            move.goto(gc, unit.id, unitLocation.add(reverseEnemyDirection))
             return
             
     # Move randomly
     for direction in directions:
         if gc.is_move_ready(unit.id):
             if gc.can_move(unit.id, direction):
-                gc.move_robot(unit.id, direction)
+                #gc.move_robot(unit.id, direction)
+                move.goto(gc, unit.id, unitLocation.add(direction))
                 return
 
     return
