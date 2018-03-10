@@ -4,6 +4,7 @@ import sys
 import traceback
 import time
 import os
+import rocket
 
 # Worker class - each worker can store a path and knows if has a plan - is running along a path
 class Worker():
@@ -18,7 +19,7 @@ class Worker():
 class UnitInfo():
     def __init__(self, gc):
         self.factoryCount = self.workerCount = self.knightCount = self.rangerCount = 0
-        self.mageCount = self.healerCount = 0
+        self.mageCount = self.healerCount = self.rocketCount = 0
         self.totalArmyCount = len(gc.my_units()) - len(workers)
         self.Research = bc.ResearchInfo()
         for unit in gc.my_units():
@@ -34,6 +35,8 @@ class UnitInfo():
                 self.mageCount += 1
             elif (unit.unit_type == bc.UnitType.Healer):
                 self.healerCount += 1
+            elif (unit.unit_type == bc.UnitType.Rocket):
+                self.rocketCount += 1
 
 def printTimeLeft(gc):
     print("Time left: ", gc.get_time_left_ms())
@@ -63,7 +66,7 @@ def runWorkerLogic(worker, unitInfo, gc):
     directions = list(bc.Direction)
     random.shuffle(directions)
 
-    if not gc.can_sense_unit(worker.workerUnitID):
+    if not gc.can_sense_unit(worker.workerUnitID) or gc.unit(worker.workerUnitID).location.is_in_garrison():
         workers.remove(worker)
         return
 
@@ -108,6 +111,18 @@ def runWorkerLogic(worker, unitInfo, gc):
                             worker.factoryBuildID = unit.id
                             print("Blueprinting")
                     return
+
+    # If there is no rocket, then build one
+    if unitInfo.rocketCount == 0:
+        if gc.karbonite() > bc.UnitType.Rocket.blueprint_cost():
+            for direction in directions:
+                if gc.can_blueprint(worker.workerUnitID, bc.UnitType.Rocket, direction):
+                    gc.blueprint(worker.workerUnitID, bc.UnitType.Rocket, direction)
+                    worker.buildsFactory = True
+                    for unit in gc.sense_nearby_units(unitLocation.add(direction), 0):
+                        if unit.unit_type == bc.UnitType.Rocket:
+                            worker.factoryBuildID = unit.id
+                        return  
 
     # If there is karbonite nearby, then try to harvest it 
     for direction in directions:
@@ -380,9 +395,20 @@ def runFactoryLogic(unit, unitInfo, gc):
     return
 
 def runRocketLogic(unit, unitInfo, gc):
-    # TODO: Implement rocket logic
-    return
+    unitLocation = unit.location.map_location()
+    print(len(unit.structure_garrison()))
+    # find and load some workers into the rocket
+    if len(unit.structure_garrison()) < 4: # TODO: We only load 4 workers for now
+        nearbyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, gc.team())
 
+        for nearU in nearbyUnits:
+            if nearU.unit_type == bc.UnitType.Worker:
+                if gc.can_load(unit.id, nearU.id):
+                    gc.load(unit.id, nearU.id)
+                    return
+    else:
+        rocket.launch(gc, gc.starting_map(bc.Planet.Earth), unit.id)
+    return
 
 # Earth game logic
 def runEarth(gc):
@@ -410,8 +436,15 @@ def runEarth(gc):
 
 # Mars game logic
 def runMars(gc):
-    # TODO:
-    print('Mars')
+    directions = list(bc.Direction)
+    for unit in gc.my_units():
+        if unit.unit_type == bc.UnitType.Rocket:
+            # ungarrison
+            if len(unit.structure_garrison()) > 0:  
+                for direction in directions:
+                    if gc.can_unload(unit.id, direction):
+                        gc.unload(unit.id, direction)
+                        return
 
 
 
@@ -439,12 +472,12 @@ maxWorkers = min(totKarb / 150, 20)  #needs tweaking after testing - now /100 - 
 maxFactories = totKarb / 300
 
 gc.queue_research(bc.UnitType.Worker)
+gc.queue_research(bc.UnitType.Rocket)
 gc.queue_research(bc.UnitType.Knight)
 gc.queue_research(bc.UnitType.Ranger)
 gc.queue_research(bc.UnitType.Ranger)
 gc.queue_research(bc.UnitType.Ranger)
 gc.queue_research(bc.UnitType.Mage)
-# gc.queue_research(bc.UnitType.Rocket) # TODO: We don't have a rocket yet.
 gc.queue_research(bc.UnitType.Healer)
 
 ################
