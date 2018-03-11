@@ -6,22 +6,15 @@ import time
 import os
 import rocket
 import move
+import workers
 
-# Worker class - each worker can store a path and knows if has a plan - is running along a path
-class Worker():
-    def __init__(self, id):
-        print("Making worker: ", id)
-        self.factoryBuildID = 0
-        self.hasPlan = False
-        self.workerUnitID = id
-        self.buildsFactory = False
-    
+
 # Class containing data about all units in current round
 class UnitInfo():
     def __init__(self, gc):
         self.factoryCount = self.workerCount = self.knightCount = self.rangerCount = 0
         self.mageCount = self.healerCount = self.rocketCount = 0
-        self.totalArmyCount = len(gc.my_units()) - len(workers)
+        self.totalArmyCount = len(gc.my_units()) - len(workersInformation.workersList)
         self.Research = bc.ResearchInfo()
         for unit in gc.my_units():
             if (unit.unit_type == bc.UnitType.Factory):
@@ -39,122 +32,11 @@ class UnitInfo():
             elif (unit.unit_type == bc.UnitType.Rocket):
                 self.rocketCount += 1
 
+
+
 def printTimeLeft(gc):
     print("Time left: ", gc.get_time_left_ms())
 
-    
-# Initialization logic
-def initializeWorkersAndGetTotalKarbonite():
-    eMap = gc.starting_map(bc.Planet.Earth)
-    KarboniteNeigbouthood = [[0 for x in range(eMap.width)] for y in range(eMap.height)]
-    totalKarbonite = 0
-    for x in range(eMap.width):    
-        for y in range(eMap.height):
-                for a in range(5):
-                        for b in range(5):
-                            if x + a - 2 >= 0 and y + b - 2 >= 0 and x + a - 2 < eMap.width and y + b - 2 < eMap.height: 
-                                location = bc.MapLocation(eMap.planet, x + a - 2, y + b - 2)
-                                #KarboniteNeigbouthood[x][y] += eMap.initial_karbonite_at(location)
-                totalKarbonite += eMap.initial_karbonite_at(bc.MapLocation(eMap.planet, x, y))
-    return totalKarbonite
-
-    
-# Unit game logic
-def runWorkerLogic(worker, unitInfo, gc):
-    # Current location of the unit
-
-    # Randomize array of directions each turn
-    directions = list(bc.Direction)
-    random.shuffle(directions)
-
-    if not gc.can_sense_unit(worker.workerUnitID) or gc.unit(worker.workerUnitID).location.is_in_garrison():
-        workers.remove(worker)
-        return
-
-    unitLocation = gc.unit(worker.workerUnitID).location.map_location()
-    nearbyUnits = gc.sense_nearby_units(unitLocation, 2)
-
-    if worker.hasPlan:
-        if gc.is_move_ready(worker.workerUnitID):
-            if gc.can_move(worker.workerUnitID, direction):
-                #gc.move_robot(worker.workerUnitID, direction)
-                move.goto(gc, worker.workerUnitID, unitLocation.add(direction))
-                return
-
-    if worker.buildsFactory:
-        # If the factory the worker is building is not finished, build it
-        if gc.can_build(worker.workerUnitID, worker.factoryBuildID):
-            gc.build(worker.workerUnitID, worker.factoryBuildID)
-            return
-        else:
-            worker.buildsFactory = False
-            return  
-
-    # duplicating
-    # If there are less than maxWorkers workers, then try to replicate
-    if unitInfo.workerCount < maxWorkers:
-        for direction in directions:
-            if gc.can_replicate(worker.workerUnitID, direction):
-                gc.replicate(worker.workerUnitID, direction)
-                for unit in gc.sense_nearby_units(unitLocation.add(direction), 0):
-                    if unit.unit_type == bc.UnitType.Worker:
-                        workers.append(Worker(unit.id))
-                return
-
-    # If there are less than maxFactories factories, then try to blueprint a factory
-    if unitInfo.factoryCount < maxFactories:
-        if gc.karbonite() > bc.UnitType.Factory.blueprint_cost():
-            for direction in directions:
-                if gc.can_blueprint(worker.workerUnitID, bc.UnitType.Factory, direction):
-                    gc.blueprint(worker.workerUnitID, bc.UnitType.Factory, direction)
-                    worker.buildsFactory=True
-                    for unit in gc.sense_nearby_units(unitLocation.add(direction), 0):
-                        if unit.unit_type==bc.UnitType.Factory:
-                            worker.factoryBuildID = unit.id
-                            print("Blueprinting")
-                    return
-
-    # If there is no rocket, then build one
-    if unitInfo.rocketCount == 0:
-        if gc.karbonite() > bc.UnitType.Rocket.blueprint_cost():
-            for direction in directions:
-                if gc.can_blueprint(worker.workerUnitID, bc.UnitType.Rocket, direction):
-                    gc.blueprint(worker.workerUnitID, bc.UnitType.Rocket, direction)
-                    worker.buildsFactory = True
-                    for unit in gc.sense_nearby_units(unitLocation.add(direction), 0):
-                        if unit.unit_type == bc.UnitType.Rocket:
-                            worker.factoryBuildID = unit.id
-                        return  
-
-    # If there is karbonite nearby, then try to harvest it 
-    for direction in directions:
-        adjacentLocation = unitLocation.add(direction)
-        # Need to try/catch because if adjacentLocation is not on map, then karbonite_at() throws exception
-        try:
-            if gc.karbonite_at(adjacentLocation) > 0:
-                if gc.can_harvest(worker.workerUnitID, direction):
-                    gc.harvest(worker.workerUnitID, direction)
-                    print("Harvesting")
-                    return
-        except Exception as e:
-            continue
-            
-    # Search karbonite
-    for direction in directions:
-        if gc.is_move_ready(worker.workerUnitID):
-            if gc.can_move(worker.workerUnitID, direction):
-                #gc.move_robot(worker.workerUnitID, direction)
-                move.goto(gc, worker.workerUnitID, unitLocation.add(direction))
-                return
-
-    #repairing comes last - least important
-    for nearbyUnit in nearbyUnits:
-        # If there are damaged factories nearby, then try to repair them
-        if gc.can_repair(worker.workerUnitID, nearbyUnit.id):
-            gc.repair(worker.workerUnitID, nearbyUnit.id)
-            return
-    
-    return
 
 def runKnightLogic(unit, unitInfo, gc):
     # If knight is in garrison, then do nothing
@@ -423,12 +305,13 @@ def runRocketLogic(unit, unitInfo, gc):
         rocket.launch(gc, gc.starting_map(bc.Planet.Earth), unit.id)
     return
 
+
 # Earth game logic
 def runEarth(gc):
     unitInfo = UnitInfo(gc)
 
-    for worker in workers:
-        runWorkerLogic(worker, unitInfo, gc)
+    for worker in workersInformation.workersList:
+        workers.runWorkerLogic(worker, unitInfo, workersInformation, gc)
 
 
     for unit in gc.my_units():
@@ -457,8 +340,14 @@ def runMars(gc):
                 for direction in directions:
                     if gc.can_unload(unit.id, direction):
                         gc.unload(unit.id, direction)
-                        return
-
+                        for newWorker in gc.sense_nearby_units(unit.location.map_location().add(direction), 0):
+                            if newWorker.unit_type == bc.UnitType.Worker:
+                                wrk = workers.Worker(newWorker.id)
+                                workersInformation.marsWorkersList.append(wrk)
+    for worker in workersInformation.marsWorkersList:
+        workers.runWorkerLogicMars(worker, workersInformation, gc)
+        print("worker running on mars")                    
+    return
 
 
 #####################################################################################
@@ -472,17 +361,16 @@ def runMars(gc):
 # Get the game controller
 gc = bc.GameController()
 random.seed(6137)
-
 #all workers will be stored
-workers = []
+workersInformation = workers.WorkersInfo()
+
 for unit in gc.my_units():
         if unit.unit_type == bc.UnitType.Worker:
-            workers.append(Worker(unit.id))
-            print("Worker added: ", unit.id)
+            workersInformation.workersList.append(workers.Worker(unit.id))
 
-totKarb = initializeWorkersAndGetTotalKarbonite()
-maxWorkers = min(totKarb / 150, 20)  #needs tweaking after testing - now /100 - that means at full workers some 33 turns to mine all without the movement
-maxFactories = totKarb / 300
+totKarb = workers.initializeWorkersAndGetTotalKarbonite(gc, workersInformation)
+workersInformation.maxWorkers = min(totKarb / 150, 20)  #needs tweaking after testing - now /100 - that means at full workers some 33 turns to mine all without the movement
+workersInformation.maxFactories = totKarb / 300
 
 gc.queue_research(bc.UnitType.Worker)
 gc.queue_research(bc.UnitType.Rocket)
@@ -512,6 +400,3 @@ while True:
 
     sys.stdout.flush()
     sys.stderr.flush()
-
-
-
