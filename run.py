@@ -303,7 +303,7 @@ def runRocketLogic(unit, unitInfo, gc):
                     gc.load(unit.id, nearU.id)
                     return
     else:
-        rocket.launch(gc, gc.starting_map(bc.Planet.Earth), unit.id)
+        rocket.launch(gc, gc.starting_map(bc.Planet.Mars), unit.id)
     return
 
 

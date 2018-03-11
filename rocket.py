@@ -5,8 +5,8 @@ import sys
 import traceback
 
 def computeOptimalLandingPlace(marsMap):
-	best = bc.MapLocation(bc.Planet.Mars, 0, 0)
-	bestKarbonite = marsMap.initial_karbonite_at(best)
+	bestKarbonite = 0
+	best = None
 
 	for x in range(marsMap.width):
 		for y in range(marsMap.height):
@@ -26,8 +26,6 @@ def computeNearbyKarbonite(marsMap, mapLocation):
 			totalKarbonite += marsMap.initial_karbonite_at(adjacentLocation)
 		except Exception as e:
 			continue
-		
-	print(totalKarbonite)
 	return totalKarbonite
 
 def launch(gc, marsMap, unitId):
@@ -40,11 +38,14 @@ def launch(gc, marsMap, unitId):
 	if len(garrison) >= 4:
 		#destination = computeOptimalLandingPlace(marsMap)
 		destination = bc.MapLocation(bc.Planet.Mars, random.randint(0, marsMap.width), random.randint(0, marsMap.height))
+		while(not marsMap.is_passable_terrain_at(destination)):
+			destination = bc.MapLocation(bc.Planet.Mars, random.randint(0, marsMap.width), random.randint(0, marsMap.height))
 		if gc.can_launch_rocket(this_rocket.id, destination):
 			gc.launch_rocket(this_rocket.id, destination)
 	else:
 		if gc.round() >= 700 and len(garrison) >= 1:
-			destination = bc.MapLocation(bc.Planet.Mars, random.randint(0, marsMap.width), random.randint(0, marsMap.height))
+			while(not marsMap.is_passable_terrain_at(destination)):
+				destination = bc.MapLocation(bc.Planet.Mars, random.randint(0, marsMap.width), random.randint(0, marsMap.height))
 			if gc.can_launch_rocket(this_rocket.id, destination):
 				gc.launch_rocket(this_rocket.id, destination)
 
