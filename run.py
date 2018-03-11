@@ -7,6 +7,7 @@ import os
 import rocket
 import move
 import workers
+import json
 
 
 # Class containing data about all units in current round
@@ -381,6 +382,8 @@ gc.queue_research(bc.UnitType.Ranger)
 gc.queue_research(bc.UnitType.Mage)
 gc.queue_research(bc.UnitType.Healer)
 
+grid = json.loads(gc.starting_map(bc.Planet.Earth).to_json())["is_passable_terrain"]
+
 ################
 #    UPDATE    #
 ################
@@ -388,6 +391,8 @@ gc.queue_research(bc.UnitType.Healer)
 while True:
     try:
         if(gc.planet() == bc.Planet.Earth):
+            #example usage for move
+            #move.move(gc, gc.my_units()[0], grid, (20,20))
             runEarth(gc)
         else:
             runMars(gc)
