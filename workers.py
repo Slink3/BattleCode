@@ -1,6 +1,7 @@
 import battlecode as bc
 import random
 import move
+import json
 
 # Worker class - each worker can store a path and knows if has a plan - is running along a path
 
@@ -18,13 +19,14 @@ class Worker():
 # class to store all the info necessary for workers logic
 class WorkersInfo():
 
-    def __init__(self):
+    def __init__(self, gc):
         self.workersList = []
         self.maxWorkers = 0
         self.maxFactories = 0
         self.currentKarbonite = []
         self.cummulativeCarbonite = []
         self.marsWorkersList = []
+        self.grid = grid = json.loads(gc.starting_map(bc.Planet.Earth).to_json())["is_passable_terrain"]
 
 # Initialization logic
 def initializeWorkersAndGetTotalKarbonite(gc, workersInformation):
@@ -68,8 +70,18 @@ def setWorkerPlan(wrk,workersInformation,gc):
     return
 
 # Local search for karbonite
-def lookForNearbyKarbonite():
-    return
+def lookForNearbyKarbonite(wrk, workersInformation, gc):
+    max = 0
+    eMap = gc.starting_map(bc.Planet.Earth)
+    loc = gc.unit(wrk.workerUnitID).location.map_location()
+    unitLoc = gc.unit(wrk.workerUnitID).location.map_location()
+    for x in range(-3,3):
+        for y in range(-3,3):
+            if unitLoc.x + x >=0 and unitLoc.x + x < eMap.width and  unitLoc.y + y >=0 and unitLoc.y + y < eMap.height:
+                if workersInformation.currentKarbonite[unitLoc.x + x][ unitLoc.y + y] > max:
+                    max=  workersInformation.currentKarbonite[unitLoc.x + x][unitLoc.y + y]
+                    loc = bc.MapLocation(eMap.planet,unitLoc.x + x,unitLoc.y + y)
+    return loc
 
 # Unit game logic
 def runWorkerLogic(worker, unitInfo, workersInformation, gc):
@@ -100,24 +112,10 @@ def runWorkerLogic(worker, unitInfo, workersInformation, gc):
     for nearbyEnemyUnit in nearbyEnemyUnits:
         if nearbyEnemyUnit.unit_type == bc.UnitType.Ranger or nearbyEnemyUnit.unit_type == bc.UnitType.Knight or nearbyEnemyUnit.unit_type == bc.UnitType.Mage:
             move.gofrom(gc,worker.workerUnitID,nearbyEnemyUnit.location.map_location())
-            return
-
-    if worker.hasPlan:
-        move.goto(gc, worker.workerUnitID, worker.destination)
-        if worker.destination.distance_squared_to((gc.unit(worker.workerUnitID)).location.map_location()) < 5:
             worker.hasPlan = False
-        return
-
-    if worker.buildsFactory:
-        # If the factory the worker is building is not finished, build it
-        if gc.can_build(worker.workerUnitID, worker.factoryBuildID):
-            gc.build(worker.workerUnitID, worker.factoryBuildID)
-            return
-        else:
-            worker.buildsFactory = False
             return
 
-    # duplicating
+
     # If there are less than maxWorkers workers, then try to replicate
     if unitInfo.workerCount < workersInformation.maxWorkers:
         for direction in directions:
@@ -127,8 +125,26 @@ def runWorkerLogic(worker, unitInfo, workersInformation, gc):
                     if unit.unit_type == bc.UnitType.Worker:
                         wrk = Worker(unit.id)
                         workersInformation.workersList.append(wrk)
-                        setWorkerPlan(wrk,workersInformation,gc)
+                        if gc.round() < 50:
+                            setWorkerPlan(wrk,workersInformation,gc)
                 return
+
+    # go according to plan
+    if worker.hasPlan:
+        move.goto(gc, worker.workerUnitID, worker.destination)
+        if worker.destination.distance_squared_to((gc.unit(worker.workerUnitID)).location.map_location()) < 5:
+            worker.hasPlan = False
+        return
+
+    # building a factory
+    if worker.buildsFactory:
+        # If the factory the worker is building is not finished, build it
+        if gc.can_build(worker.workerUnitID, worker.factoryBuildID):
+            gc.build(worker.workerUnitID, worker.factoryBuildID)
+            return
+        else:
+            worker.buildsFactory = False
+            return
 
     # If there are less than maxFactories factories, then try to blueprint a factory
     if unitInfo.factoryCount < workersInformation.maxFactories:
@@ -144,7 +160,7 @@ def runWorkerLogic(worker, unitInfo, workersInformation, gc):
                     return
 
     # If there is no rocket, then build one
-    if unitInfo.rocketCount == 0:
+    if unitInfo.rocketCount == 0 and gc.round()>350:   #don't know about the constant?
         if gc.karbonite() > bc.UnitType.Rocket.blueprint_cost():
             for direction in directions:
                 if gc.can_blueprint(worker.workerUnitID, bc.UnitType.Rocket, direction):
@@ -163,7 +179,7 @@ def runWorkerLogic(worker, unitInfo, workersInformation, gc):
             if gc.karbonite_at(adjacentLocation) > 0:
                 if gc.can_harvest(worker.workerUnitID, direction):
                     gc.harvest(worker.workerUnitID, direction)
-                    print("Harvesting")
+                    workersInformation.currentKarbonite[gc.unit(worker.workerUnitID).location.map_location().add(direction).x][gc.unit(worker.workerUnitID).location.map_location().add(direction).x] -= 3
                     return
         except Exception as e:
             continue
@@ -176,6 +192,7 @@ def runWorkerLogic(worker, unitInfo, workersInformation, gc):
                 move.goto(gc, worker.workerUnitID, unitLocation.add(direction))
                 return
 
+
     # repairing comes last - least important
     for nearbyUnit in nearbyUnits:
         # If there are damaged factories nearby, then try to repair them
@@ -183,6 +200,15 @@ def runWorkerLogic(worker, unitInfo, workersInformation, gc):
             gc.repair(worker.workerUnitID, nearbyUnit.id)
             return
     return
+
+    # if everything failed, try to just go randomly...
+    for direction in directions:
+        if gc.is_move_ready(worker.workerUnitID):
+            if gc.can_move(worker.workerUnitID, direction):
+                # gc.move_robot(worker.workerUnitID, direction)
+                move.goto(gc, worker.workerUnitID, unitLocation.add(direction))
+                return
+
 
 def runWorkerLogicMars(worker,workersInformation,gc):
 
@@ -202,6 +228,7 @@ def runWorkerLogicMars(worker,workersInformation,gc):
             if gc.karbonite_at(adjacentLocation) > 0:
                 if gc.can_harvest(worker.workerUnitID, direction):
                     gc.harvest(worker.workerUnitID, direction)
+
                     print("Harvesting")
                     return
         except Exception as e:

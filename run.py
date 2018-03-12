@@ -363,7 +363,7 @@ def runMars(gc):
 gc = bc.GameController()
 random.seed(6137)
 #all workers will be stored
-workersInformation = workers.WorkersInfo()
+workersInformation = workers.WorkersInfo(gc)
 
 for unit in gc.my_units():
         if unit.unit_type == bc.UnitType.Worker:
@@ -383,7 +383,6 @@ gc.queue_research(bc.UnitType.Mage)
 gc.queue_research(bc.UnitType.Healer)
 
 grid = json.loads(gc.starting_map(bc.Planet.Earth).to_json())["is_passable_terrain"]
-
 ################
 #    UPDATE    #
 ################
