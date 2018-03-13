@@ -290,7 +290,7 @@ def runHealerLogic(unit, unitInfo, gc):
     # Current location of the unit
     unitLocation = unit.location.map_location()
 
-    if unit.is_heal_ready(unit.id):
+    if gc.is_heal_ready(unit.id):
         closestFriendlyUnit = findClosestFriendlyUnit(unit, gc.my_units())
         if not closestFriendlyUnit is None:
             direction = unitLocation.direction_to(closestFriendlyUnit.location.map_location())
