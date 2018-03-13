@@ -61,7 +61,7 @@ def runMars(gc):
         elif unit.unit_type == bc.UnitType.Factory:
             structure.runFactoryLogicMars(unit, unitInfo, gc)
         elif unit.unit_type == bc.UnitType.Rocket:
-            structure.runRocketLogicMars(unit, unitInfo, gc)
+            structure.runRocketLogicMars(unit, workers, workersInformation, unitInfo, gc)
                               
     return
 

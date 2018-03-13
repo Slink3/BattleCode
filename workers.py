@@ -160,7 +160,7 @@ def runWorkerLogic(worker, unitInfo, workersInformation, gc):
                     return
 
     # If there is no rocket, then build one
-    if unitInfo.rocketCount == 0 and gc.round()>350:   #don't know about the constant?
+    if unitInfo.rocketCount == 0 and gc.round()>200:   #don't know about the constant?
         if gc.karbonite() > bc.UnitType.Rocket.blueprint_cost():
             for direction in directions:
                 if gc.can_blueprint(worker.workerUnitID, bc.UnitType.Rocket, direction):

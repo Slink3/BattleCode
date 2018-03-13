@@ -1,6 +1,7 @@
 import battlecode as bc
 import random
 import move
+import rocket
 
 def runFactoryLogic(unit, unitInfo, gc):
     # Randomize array of directions each turn
@@ -70,7 +71,7 @@ def runFactoryLogicMars(unit, unitInfo, gc):
     runFactoryLogic(unit, unitInfo, gc)
     return
 
-def runRocketLogicMars(unit, unitInfo, gc):
+def runRocketLogicMars(unit, workers, workersInformation, unitInfo, gc):
      # Try to unload existing units from structure's garrison
     if len(unit.structure_garrison()) > 0:  
         for direction in directions:
@@ -82,3 +83,5 @@ def runRocketLogicMars(unit, unitInfo, gc):
                         workersInformation.marsWorkersList.append(wrk)
                         return
     return
+
+directions = list(bc.Direction)
