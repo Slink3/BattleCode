@@ -17,7 +17,7 @@ def printTimeLeft(gc):
 
 
 # Earth game logic
-def runEarth(gc):
+def runEarth(gc, mapInfo):
     unitInfo = info.UnitInfo(gc)
 
     for worker in workersInformation.workersList:
@@ -25,22 +25,22 @@ def runEarth(gc):
 
     for unit in gc.my_units():
         if unit.unit_type == bc.UnitType.Knight:
-            fight.runKnightLogic(unit, unitInfo, gc)
+            fight.runKnightLogic(unit, unitInfo, mapInfo, gc)
         elif unit.unit_type == bc.UnitType.Ranger:
-            fight.runRangerLogic(unit, unitInfo, gc)
+            fight.runRangerLogic(unit, unitInfo, mapInfo, gc)
         elif unit.unit_type == bc.UnitType.Mage:
-            fight.runMageLogic(unit, unitInfo, gc)
+            fight.runMageLogic(unit, unitInfo, mapInfo, gc)
         elif unit.unit_type == bc.UnitType.Healer:
-            fight.runHealerLogic(unit, unitInfo, gc)
+            fight.runHealerLogic(unit, unitInfo, mapInfo, gc)
         elif unit.unit_type == bc.UnitType.Factory:
-            structure.runFactoryLogic(unit, unitInfo, gc)
+            structure.runFactoryLogic(unit, unitInfo, mapInfo, gc)
         elif unit.unit_type == bc.UnitType.Rocket:
-            structure.runRocketLogic(unit, unitInfo, gc)
+            structure.runRocketLogic(unit, unitInfo, mapInfo, gc)
 
     printTimeLeft(gc)
 
 # Mars game logic
-def runMars(gc):
+def runMars(gc, mapInfo):
     unitInfo = info.UnitInfo(gc)
 
     for worker in workersInformation.marsWorkersList:
@@ -48,15 +48,15 @@ def runMars(gc):
 
     for unit in gc.my_units():
         if unit.unit_type == bc.UnitType.Knight:
-            fight.runKnightLogic(unit, unitInfo, gc)
+            fight.runKnightLogic(unit, unitInfo, mapInfo, gc)
         elif unit.unit_type == bc.UnitType.Ranger:
-            fight.runRangerLogic(unit, unitInfo, gc)
+            fight.runRangerLogic(unit, unitInfo, mapInfo, gc)
         elif unit.unit_type == bc.UnitType.Mage:
-            fight.runMageLogic(unit, unitInfo, gc)
+            fight.runMageLogic(unit, unitInfo, mapInfo, gc)
         elif unit.unit_type == bc.UnitType.Healer:
-            fight.runHealerLogic(unit, unitInfo, gc)
+            fight.runHealerLogic(unit, unitInfo, mapInfo, gc)
         elif unit.unit_type == bc.UnitType.Factory:
-            structure.runFactoryLogicMars(unit, unitInfo, gc)
+            structure.runFactoryLogicMars(unit, unitInfo, mapInfo, gc)
         elif unit.unit_type == bc.UnitType.Rocket:
             structure.runRocketLogicMars(unit, workers, workersInformation, gc)
                               
@@ -74,6 +74,8 @@ def runMars(gc):
 # Get the game controller
 gc = bc.GameController()
 random.seed(6137)
+
+mapInfo = info.MapInfo(gc)
 
 #all workers will be stored
 workersInformation = workers.WorkersInfo(gc)
@@ -95,6 +97,7 @@ gc.queue_research(bc.UnitType.Ranger)
 gc.queue_research(bc.UnitType.Mage)
 gc.queue_research(bc.UnitType.Healer)
 
+
 #grid = json.loads(gc.starting_map(bc.Planet.Earth).to_json())["is_passable_terrain"]
 ################
 #    UPDATE    #
@@ -105,9 +108,9 @@ while True:
         if(gc.planet() == bc.Planet.Earth):
             #example usage for move
             #move.move(gc, gc.my_units()[0], grid, (20,20))
-            runEarth(gc)
+            runEarth(gc, mapInfo)
         else:
-            runMars(gc)
+            runMars(gc, mapInfo)
 
     except Exception as e:
         print('Error:', e)

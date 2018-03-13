@@ -3,7 +3,7 @@ import random
 import move
 import rocket
 
-def runFactoryLogic(unit, unitInfo, gc):
+def runFactoryLogic(unit, unitInfo, mapInfo, gc):
     # Randomize array of directions each turn
     directions = list(bc.Direction)
     random.shuffle(directions)
@@ -51,7 +51,7 @@ def runFactoryLogic(unit, unitInfo, gc):
 
     return
 
-def runRocketLogic(unit, unitInfo, gc):
+def runRocketLogic(unit, unitInfo, mapInfo, gc):
     unitLocation = unit.location.map_location()
 
     # find and load some workers into the rocket
