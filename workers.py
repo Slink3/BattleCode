@@ -210,7 +210,7 @@ def runWorkerLogic(worker, unitInfo, workersInformation, gc):
                 return
 
 
-def runWorkerLogicMars(worker,workersInformation,gc):
+def runWorkerLogicMars(worker, workersInformation, gc):
 
     if not gc.can_sense_unit(worker.workerUnitID) or gc.unit(worker.workerUnitID).location.is_in_garrison():
         workersInformation.marsWorkersList.remove(worker)
@@ -241,3 +241,5 @@ def runWorkerLogicMars(worker,workersInformation,gc):
                 # gc.move_robot(worker.workerUnitID, direction)
                 move.goto(gc, worker.workerUnitID, unitLocation.add(direction))
                 return
+
+

@@ -43,11 +43,8 @@ def runEarth(gc):
 def runMars(gc):
     unitInfo = info.UnitInfo(gc)
 
-    directions = list(bc.Direction)
-
     for worker in workersInformation.marsWorkersList:
-        workers.runWorkerLogicMars(worker, workersInformation, gc)
-        print("worker running on mars")  
+        workers.runWorkerLogicMars(worker, workersInformation, gc) 
 
     for unit in gc.my_units():
         if unit.unit_type == bc.UnitType.Knight:
@@ -61,7 +58,7 @@ def runMars(gc):
         elif unit.unit_type == bc.UnitType.Factory:
             structure.runFactoryLogicMars(unit, unitInfo, gc)
         elif unit.unit_type == bc.UnitType.Rocket:
-            structure.runRocketLogicMars(unit, workers, workersInformation, unitInfo, gc)
+            structure.runRocketLogicMars(unit, workers, workersInformation, gc)
                               
     return
 
@@ -98,7 +95,7 @@ gc.queue_research(bc.UnitType.Ranger)
 gc.queue_research(bc.UnitType.Mage)
 gc.queue_research(bc.UnitType.Healer)
 
-grid = json.loads(gc.starting_map(bc.Planet.Earth).to_json())["is_passable_terrain"]
+#grid = json.loads(gc.starting_map(bc.Planet.Earth).to_json())["is_passable_terrain"]
 ################
 #    UPDATE    #
 ################

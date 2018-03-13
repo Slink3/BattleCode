@@ -53,16 +53,15 @@ def runFactoryLogic(unit, unitInfo, gc):
 
 def runRocketLogic(unit, unitInfo, gc):
     unitLocation = unit.location.map_location()
-    print(len(unit.structure_garrison()))
+
     # find and load some workers into the rocket
-    if len(unit.structure_garrison()) < 4: # TODO: We only load 4 workers for now
+    if len(unit.structure_garrison()) < 4: # TODO: We only load 4 units for now
         nearbyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, gc.team())
 
         for nearU in nearbyUnits:
-            if nearU.unit_type == bc.UnitType.Worker:
-                if gc.can_load(unit.id, nearU.id):
-                    gc.load(unit.id, nearU.id)
-                    return
+            if gc.can_load(unit.id, nearU.id):
+                gc.load(unit.id, nearU.id)
+                return
     else:
         rocket.launch(gc, gc.starting_map(bc.Planet.Mars), unit.id)
     return
@@ -71,7 +70,7 @@ def runFactoryLogicMars(unit, unitInfo, gc):
     runFactoryLogic(unit, unitInfo, gc)
     return
 
-def runRocketLogicMars(unit, workers, workersInformation, unitInfo, gc):
+def runRocketLogicMars(unit, workers, workersInformation, gc):
      # Try to unload existing units from structure's garrison
     if len(unit.structure_garrison()) > 0:  
         for direction in directions:
