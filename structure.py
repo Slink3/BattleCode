@@ -34,19 +34,13 @@ def launch(gc, marsMap, unitId):
 		return
 	garrison = this_rocket.structure_garrison()
 
-	if len(garrison) >= 4:
-		#destination = computeOptimalLandingPlace(marsMap)
+	#destination = computeOptimalLandingPlace(marsMap)
+	destination = bc.MapLocation(bc.Planet.Mars, random.randint(0, marsMap.width), random.randint(0, marsMap.height))
+	while(not marsMap.is_passable_terrain_at(destination)):
 		destination = bc.MapLocation(bc.Planet.Mars, random.randint(0, marsMap.width), random.randint(0, marsMap.height))
-		while(not marsMap.is_passable_terrain_at(destination)):
-			destination = bc.MapLocation(bc.Planet.Mars, random.randint(0, marsMap.width), random.randint(0, marsMap.height))
-		if gc.can_launch_rocket(this_rocket.id, destination):
-			gc.launch_rocket(this_rocket.id, destination)
-	else:
-		if gc.round() >= 700 and len(garrison) >= 1:
-			while(not marsMap.is_passable_terrain_at(destination)):
-				destination = bc.MapLocation(bc.Planet.Mars, random.randint(0, marsMap.width), random.randint(0, marsMap.height))
-			if gc.can_launch_rocket(this_rocket.id, destination):
-				gc.launch_rocket(this_rocket.id, destination)
+	if gc.can_launch_rocket(this_rocket.id, destination):
+		gc.launch_rocket(this_rocket.id, destination)
+
 
 
 def runFactoryLogic(unit, unitInfo, mapInfo, gc):
@@ -99,9 +93,13 @@ def runFactoryLogic(unit, unitInfo, mapInfo, gc):
 
 def runRocketLogic(unit, unitInfo, mapInfo, gc):
     unitLocation = unit.location.map_location()
-
+    
     # find and load some workers into the rocket
-    if len(unit.structure_garrison()) < 4: # TODO: We only load 4 units for now
+    if len(unit.structure_garrison()) < 8:
+        if gc.round() >= 700 and len(unit.structure_garrison()) >= 1:
+            launch(gc, gc.starting_map(bc.Planet.Mars), unit.id)
+            return
+
         nearbyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, gc.team())
 
         for nearU in nearbyUnits:
