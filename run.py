@@ -11,8 +11,6 @@ import fight
 import info
 import json
 
-from datetime import datetime
-
 def printTimeLeft(gc):
     print("Time left: ", gc.get_time_left_ms())
 
@@ -21,53 +19,22 @@ def printTimeLeft(gc):
 def runEarth(gc, mapInfo):
     unitInfo = info.UnitInfo(gc)
 
-    before = datetime.now()
     for worker in workersInformation.workersList:
         workers.runWorkerLogic(worker, unitInfo, workersInformation, gc)
-    
-    print("worker LOGIC TOOK TIME: ", datetime.now() - before)
-    before = datetime.now()
 
     for unit in gc.my_units():
         if unit.unit_type == bc.UnitType.Knight:
             fight.runKnightLogic(unit, unitInfo, mapInfo, gc)
-
-    print("KNIGHT LOGIC TOOK TIME: ", datetime.now() - before)
-    before = datetime.now()
-
-    for unit in gc.my_units():
         if unit.unit_type == bc.UnitType.Ranger:
             fight.runRangerLogic(unit, unitInfo, mapInfo, gc)
-
-    print("RANGER LOGIC TOOK TIME: ", datetime.now() - before)
-    before = datetime.now()
-
-    for unit in gc.my_units():
         if unit.unit_type == bc.UnitType.Mage:
             fight.runMageLogic(unit, unitInfo, mapInfo, gc)
-
-    print("mage LOGIC TOOK TIME: ", datetime.now() - before)
-    before = datetime.now()
-
-    for unit in gc.my_units():
         if unit.unit_type == bc.UnitType.Healer:
             fight.runHealerLogic(unit, unitInfo, mapInfo, gc)
-
-    print("healer LOGIC TOOK TIME: ", datetime.now() - before)
-    before = datetime.now()
-
-    for unit in gc.my_units():
         if unit.unit_type == bc.UnitType.Factory:
             structure.runFactoryLogic(unit, unitInfo, mapInfo, gc)
-
-    print("factory LOGIC TOOK TIME: ", datetime.now() - before)
-    before = datetime.now()
-        
-    for unit in gc.my_units():
         if unit.unit_type == bc.UnitType.Rocket:
            structure.runRocketLogic(unit, unitInfo, mapInfo, gc)
-
-    print("rockete LOGIC TOOK TIME: ", datetime.now() - before)
 
     printTimeLeft(gc)
 

@@ -3,83 +3,38 @@ import random
 import info
 import move
 
-from datetime import datetime
-
-def findClosestEnemyUnit(unit, enemyUnitsLocation):
-
-    before = datetime.now()
-
-    closestEnemyUnitLocation = None
-    
-    unitLocation = unit.location.map_location()
+def findEnemyUnitLocation(unit, enemyUnitsLocation):
+    enemyUnitLocation = None
 
     if len(enemyUnitsLocation) > 0:
-        closestEnemyUnitLocation = enemyUnitsLocation[0]
-        closestEnemyDistance = unitLocation.distance_squared_to(closestEnemyUnitLocation)
+        enemyUnitLocation = enemyUnitsLocation[0]
 
-    '''
-    for enemyUnitLocation in enemyUnitsLocation:
-        enemyUnitDistance = unitLocation.distance_squared_to(enemyUnitLocation)
-        if enemyUnitDistance < closestEnemyDistance:
-            closestEnemyUnitLocation = enemyUnitLocation
-            closestEnemyDistance = enemyUnitDistance
-    '''
+    return enemyUnitLocation
 
-    
-    #print("FINDCLOSESTENEMYUNIT TOOK TIME: ", datetime.now() - before)
-
-    return closestEnemyUnitLocation
-
-def findClosestFriendlyUnit(unit, friendlyUnitsLocation):
-    before = datetime.now()
-    closestFriendlyUnitLocation = None
+def findFriendlyUnitLocation(unit, friendlyUnitsLocation):
+    FriendlyUnitLocation = None
 
     unitLocation = unit.location.map_location()
 
     for friendlyUnitLocation in friendlyUnitsLocation:
         if friendlyUnitLocation is not unitLocation:
-            closestFriendlyUnitLocation = friendlyUnitLocation
-            closestFriendlyUnitDistance = unitLocation.distance_squared_to(friendlyUnitLocation)
+            FriendlyUnitLocation = friendlyUnitLocation
             break
 
-    '''
-    if not closestFriendlyUnitLocation is None:
-        for friendlyUnitLocation in friendlyUnitsLocation:
-            if friendlyUnitLocation is not unitLocation:
-                friendlyUnitDistance = unitLocation.distance_squared_to(friendlyUnitLocation)
-                if friendlyUnitDistance < closestFriendlyUnitDistance:
-                    closestFriendlyUnitLocation = friendlyUnitLocation
-                    closestFriendlyUnitDistance = friendlyUnitDistance
-    '''
-                
-    #print("FINDCLOSESTFRIENDLYUNIT TOOK TIME: ", datetime.now() - before)
+    return FriendlyUnitLocation
 
-    return closestFriendlyUnitLocation
-
-'''
-def findClosestFriendlyWoundedUnit(unit, friendlyUnitslocation):
-    before = datetime.now()
-    closestWoundedFriendlyUnitLocation = None
+def findFriendlyWoundedUnitLocation(unit, friendlyUnitsLocation):
+    WoundedFriendlyUnitLocation = None
 
     unitLocation = unit.location.map_location()
 
-    woundedFriendlyUnitsLocation = []
-    for friendlyUnitlocation in friendlyUnitslocation:
-        if friendlyUnitlocation is not unitLocation:
-            if woundedFriendlyUnit.health < woundedFriendlyUnit.maxHealth:
-                woundedFriendlyUnits.append(woundedFriendlyUnit)
-    
-    if(len(woundedFriendlyUnits) > 0):
-        closestWoundedFriendlyUnit = woundedFriendlyUnits[0]
-        
-    for woundedFriendlyUnit in woundedFriendlyUnits:
-        if unit.location.map_location().distance_squared_to(woundedFriendlyUnit.location.map_location()) < unit.location.map_location().distance_squared_to(closestWoundedFriendlyUnit.location.map_location()):
-            closestWoundedFriendlyUnit = woundedFriendlyUnit
+    for friendlyUnitLocation in friendlyUnitsLocation:
+        if friendlyUnitLocation is not unitLocation:
+            friendlyUnit = gc.sense_unit_in_location(friendlyUnitLocation)
+            if friendlyUnit.health < friendlyUnit.maxHealth:
+                WoundedFriendlyUnitLocation = friendlyUnitLocation
 
-    print("FINDCLOSESTWOUNDEDFRINEDLYUNIT TOOK TIME: ", datetime.now() - before)
-
-    return closestWoundedFriendlyUnit
-'''
+    return WoundedFriendlyUnitLocation
 
 # Unit game logic
 def runKnightLogic(unit, unitInfo, mapInfo, gc):
@@ -95,12 +50,12 @@ def runKnightLogic(unit, unitInfo, mapInfo, gc):
             return
 
         if unit.location.map_location().planet == bc.Planet.Earth:
-            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.earthFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.earthFriendlyUnitsLocation)
         else:
-            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.MarsFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.MarsFriendlyUnitsLocation)
 
-        if not closestFriendlyUnitLocation is None:
-            direction = unitLocation.direction_to(closestFriendlyUnitLocation)
+        if not FriendlyUnitLocation is None:
+            direction = unitLocation.direction_to(FriendlyUnitLocation)
             if gc.can_move(unit.id, direction):
                 #gc.move_robot(unit.id, direction)
                 move.goto(gc, unit.id, unitLocation.add(direction))
@@ -147,12 +102,12 @@ def runKnightLogic(unit, unitInfo, mapInfo, gc):
         
     # Try to move to closest enemy unit
     if unit.location.map_location().planet == bc.Planet.Earth:
-        closestEnemyUnitLocation = findClosestEnemyUnit(unit, unitInfo.earthVisibleEnemyUnitsLocation)
+        EnemyUnitLocation = findEnemyUnitLocation(unit, unitInfo.earthVisibleEnemyUnitsLocation)
     else:
-        closestEnemyUnitLocation = findClosestEnemyUnit(unit, unitInfo.marsVisibleEnemyUnitsLocation)
+        EnemyUnitLocation = findEnemyUnitLocation(unit, unitInfo.marsVisibleEnemyUnitsLocation)
 
-    if not closestEnemyUnitLocation is None:
-        direction = unitLocation.direction_to(closestEnemyUnitLocation)
+    if not EnemyUnitLocation is None:
+        direction = unitLocation.direction_to(EnemyUnitLocation)
         if gc.can_move(unit.id, direction):
             #gc.move_robot(unit.id, direction)
             move.goto(gc, unit.id, unitLocation.add(direction))
@@ -191,12 +146,12 @@ def runRangerLogic(unit, unitInfo, mapInfo, gc):
             return
 
         if unit.location.map_location().planet == bc.Planet.Earth:
-            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.earthFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.earthFriendlyUnitsLocation)
         else:
-            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.MarsFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.MarsFriendlyUnitsLocation)
 
-        if not closestFriendlyUnitLocation is None:
-            direction = unitLocation.direction_to(closestFriendlyUnitLocation)
+        if not FriendlyUnitLocation is None:
+            direction = unitLocation.direction_to(FriendlyUnitLocation)
             if gc.is_move_ready(unit.id):
                 if gc.can_move(unit.id, direction):
                     #gc.move_robot(unit.id, direction)
@@ -250,12 +205,12 @@ def runRangerLogic(unit, unitInfo, mapInfo, gc):
 
     # Try to move to closest enemyUnit
     if unit.location.map_location().planet == bc.Planet.Earth:
-        closestEnemyUnitLocation = findClosestEnemyUnit(unit, unitInfo.earthVisibleEnemyUnitsLocation)
+        EnemyUnitLocation = findEnemyUnitLocation(unit, unitInfo.earthVisibleEnemyUnitsLocation)
     else:
-        closestEnemyUnitLocation = findClosestEnemyUnit(unit, unitInfo.marsVisibleEnemyUnitsLocation)
+        EnemyUnitLocation = findEnemyUnitLocation(unit, unitInfo.marsVisibleEnemyUnitsLocation)
 
-    if not closestEnemyUnitLocation is None:
-        direction = unitLocation.direction_to(closestEnemyUnitLocation)
+    if not EnemyUnitLocation is None:
+        direction = unitLocation.direction_to(EnemyUnitLocation)
         if gc.can_move(unit.id, direction):
             #gc.move_robot(unit.id, direction)
             move.goto(gc, unit.id, unitLocation.add(direction))
@@ -291,12 +246,12 @@ def runMageLogic(unit, unitInfo, mapInfo, gc):
             return
         
         if unit.location.map_location().planet == bc.Planet.Earth:
-            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.earthFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.earthFriendlyUnitsLocation)
         else:
-            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.MarsFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.MarsFriendlyUnitsLocation)
 
-        if not closestFriendlyUnitLocation is None:
-            direction = unitLocation.direction_to(closestFriendlyUnitLocation)
+        if not FriendlyUnitLocation is None:
+            direction = unitLocation.direction_to(FriendlyUnitLocation)
             if gc.can_move(unit.id, direction):
                 #gc.move_robot(unit.id, direction)
                 move.goto(gc, unit.id, unitLocation.add(direction))
@@ -346,12 +301,12 @@ def runMageLogic(unit, unitInfo, mapInfo, gc):
 
     # Try to move to closest enemyUnit
     if unit.location.map_location().planet == bc.Planet.Earth:
-        closestEnemyUnitLocation = findClosestEnemyUnit(unit, unitInfo.earthVisibleEnemyUnitsLocation)
+        EnemyUnitLocation = findEnemyUnitLocation(unit, unitInfo.earthVisibleEnemyUnitsLocation)
     else:
-        closestEnemyUnitLocation = findClosestEnemyUnit(unit, unitInfo.marsVisibleEnemyUnitsLocation)
+        EnemyUnitLocation = findEnemyUnitLocation(unit, unitInfo.marsVisibleEnemyUnitsLocation)
         
-    if not closestEnemyUnitLocation is None:
-        direction = unitLocation.direction_to(closestEnemyUnitLocation)
+    if not EnemyUnitLocation is None:
+        direction = unitLocation.direction_to(EnemyUnitLocation)
         if gc.can_move(unit.id, direction):
             #gc.move_robot(unit.id, direction)
             move.goto(gc, unit.id, unitLocation.add(direction))
@@ -388,12 +343,12 @@ def runHealerLogic(unit, unitInfo, mapInfo, gc):
             return
 
         if unit.location.map_location().planet == bc.Planet.Earth:
-            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.earthFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.earthFriendlyUnitsLocation)
         else:
-            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.MarsFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.MarsFriendlyUnitsLocation)
 
-        if not closestFriendlyUnitLocation is None:
-            direction = unitLocation.direction_to(closestFriendlyUnitLocation.location.map_location())
+        if not FriendlyUnitLocation is None:
+            direction = unitLocation.direction_to(FriendlyUnitLocation.location.map_location())
             if gc.can_move(unit.id, direction):
                 #gc.move_robot(unit.id, direction)
                 move.goto(gc, unit.id, unitLocation.add(direction))
@@ -441,20 +396,17 @@ def runHealerLogic(unit, unitInfo, mapInfo, gc):
             return
 
     # Try to move to closest friendly unit
-    '''
     if unit.location.map_location().planet == bc.Planet.Earth:
-        closestFriendlyUnit = findClosestFriendlyWoundedUnit(unit, unitInfo.earthFriendlyWoundedUnits)
+        FriendlyUnit = findFriendlyWoundedUnitLocation(unit, unitInfo.earthFriendlyWoundedUnits)
     else:
-        closestFriendlyUnit = findClosestFriendlyWoundedUnit(unit, unitInfo.MarsFriendlyWoundedUnits)
+        FriendlyUnit = findFriendlyWoundedUnitLocation(unit, unitInfo.MarsFriendlyWoundedUnits)
 
-    if not closestFriendlyUnit is None:
-        direction = unitLocation.direction_to(closestFriendlyUnit.location.map_location())
-        if gc.is_move_ready(unit.id):
-            if gc.can_move(unit.id, direction):
-                #gc.move_robot(unit.id, direction)
-                move.goto(gc, unit.id, unitLocation.add(direction))
-                return
-    '''
+    if not FriendlyUnit is None:
+        direction = unitLocation.direction_to(FriendlyUnit.location.map_location())
+        if gc.can_move(unit.id, direction):
+            #gc.move_robot(unit.id, direction)
+            move.goto(gc, unit.id, unitLocation.add(direction))
+            return
 
     # Try to move to starting enemy location
     for startingEnemyLocation in mapInfo.startingEnemyLocations:
