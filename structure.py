@@ -59,35 +59,36 @@ def runFactoryLogic(unit, unitInfo, mapInfo, gc):
             print("Unloading unit")
             return
 
-    # If there are less than 5 knights, then produce a knight
-    if unitInfo.knightCount < max(5, unitInfo.totalArmyCount * 0.35):
-        if gc.can_produce_robot(unit.id, bc.UnitType.Knight): # TODO: 
-            gc.produce_robot(unit.id, bc.UnitType.Knight)
-            print("Producing knight")
-            return
+    if gc.round()<675:
+        # If there are less than 5 knights, then produce a knight
+        if unitInfo.knightCount < max(5, unitInfo.totalArmyCount * 0.35):
+            if gc.can_produce_robot(unit.id, bc.UnitType.Knight): # TODO: 
+                gc.produce_robot(unit.id, bc.UnitType.Knight)
+                print("Producing knight")
+                return
 
-    # If there are less than 5 rangers, then produce a ranger
-    if unitInfo.rangerCount < max(5, unitInfo.totalArmyCount * 0.6):
-        if gc.can_produce_robot(unit.id, bc.UnitType.Ranger): # TODO: 
-            gc.produce_robot(unit.id, bc.UnitType.Ranger)
-            print("Producing ranger")
-            return
+        # If there are less than 5 rangers, then produce a ranger
+        if unitInfo.rangerCount < max(5, unitInfo.totalArmyCount * 0.6):
+            if gc.can_produce_robot(unit.id, bc.UnitType.Ranger): # TODO: 
+                gc.produce_robot(unit.id, bc.UnitType.Ranger)
+                print("Producing ranger")
+                return
 
-    # If there are less than 5 mages, then produce a mage
-    '''
-    if unitInfo.mageCount < max(0, unitInfo.totalArmyCount * 3):
-        if gc.can_produce_robot(unit.id, bc.UnitType.Mage): # TODO: 
-            gc.produce_robot(unit.id, bc.UnitType.Mage)
-            print("Producing mage")
-            return
-    '''
+        # If there are less than 5 mages, then produce a mage
+        '''
+        if unitInfo.mageCount < max(0, unitInfo.totalArmyCount * 3):
+            if gc.can_produce_robot(unit.id, bc.UnitType.Mage): # TODO: 
+                gc.produce_robot(unit.id, bc.UnitType.Mage)
+                print("Producing mage")
+                return
+        '''
 
-    # If there are less than 5 rangers, then produce a healer
-    if unitInfo.healerCount < unitInfo.totalArmyCount * 0.05:
-        if gc.can_produce_robot(unit.id, bc.UnitType.Healer): # TODO: 
-            gc.produce_robot(unit.id, bc.UnitType.Healer)
-            print("Producing healer")
-            return
+        # If there are less than 5 rangers, then produce a healer
+        if unitInfo.healerCount < unitInfo.totalArmyCount * 0.05:
+            if gc.can_produce_robot(unit.id, bc.UnitType.Healer): # TODO: 
+                gc.produce_robot(unit.id, bc.UnitType.Healer)
+                print("Producing healer")
+                return
 
     return
 
