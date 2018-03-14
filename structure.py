@@ -56,22 +56,19 @@ def runFactoryLogic(unit, unitInfo, mapInfo, gc):
     for direction in directions:
         if gc.can_unload(unit.id, direction):
             gc.unload(unit.id, direction)
-            print("Unloading unit")
             return
 
     if gc.round()<675:
         # If there are less than 5 knights, then produce a knight
         if unitInfo.knightCount < max(5, unitInfo.totalArmyCount * 0.35):
-            if gc.can_produce_robot(unit.id, bc.UnitType.Knight): # TODO: 
+            if gc.can_produce_robot(unit.id, bc.UnitType.Knight):
                 gc.produce_robot(unit.id, bc.UnitType.Knight)
-                print("Producing knight")
                 return
 
         # If there are less than 5 rangers, then produce a ranger
         if unitInfo.rangerCount < max(5, unitInfo.totalArmyCount * 0.6):
-            if gc.can_produce_robot(unit.id, bc.UnitType.Ranger): # TODO: 
+            if gc.can_produce_robot(unit.id, bc.UnitType.Ranger): 
                 gc.produce_robot(unit.id, bc.UnitType.Ranger)
-                print("Producing ranger")
                 return
 
         # If there are less than 5 mages, then produce a mage
@@ -87,7 +84,6 @@ def runFactoryLogic(unit, unitInfo, mapInfo, gc):
         if unitInfo.healerCount < unitInfo.totalArmyCount * 0.05:
             if gc.can_produce_robot(unit.id, bc.UnitType.Healer): # TODO: 
                 gc.produce_robot(unit.id, bc.UnitType.Healer)
-                print("Producing healer")
                 return
 
     return

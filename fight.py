@@ -69,7 +69,7 @@ def runKnightLogic(unit, unitInfo, mapInfo, gc):
         if unit.location.map_location().planet == bc.Planet.Earth:
             FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.earthFriendlyUnitsLocation)
         else:
-            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.MarsFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.marsFriendlyUnitsLocation)
 
         if not FriendlyUnitLocation is None:
             direction = unitLocation.direction_to(FriendlyUnitLocation)
@@ -165,7 +165,7 @@ def runRangerLogic(unit, unitInfo, mapInfo, gc):
         if unit.location.map_location().planet == bc.Planet.Earth:
             FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.earthFriendlyUnitsLocation)
         else:
-            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.MarsFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.marsFriendlyUnitsLocation)
 
         if not FriendlyUnitLocation is None:
             direction = unitLocation.direction_to(FriendlyUnitLocation)
@@ -250,6 +250,7 @@ def runRangerLogic(unit, unitInfo, mapInfo, gc):
 
     return
 
+'''
 def runMageLogic(unit, unitInfo, mapInfo, gc):
     # If mage is in garrison or space, then do nothing
     if not unit.location.is_on_map():
@@ -265,7 +266,7 @@ def runMageLogic(unit, unitInfo, mapInfo, gc):
         if unit.location.map_location().planet == bc.Planet.Earth:
             FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.earthFriendlyUnitsLocation)
         else:
-            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.MarsFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.marsFriendlyUnitsLocation)
 
         if not FriendlyUnitLocation is None:
             direction = unitLocation.direction_to(FriendlyUnitLocation)
@@ -281,7 +282,7 @@ def runMageLogic(unit, unitInfo, mapInfo, gc):
 
        
 
-    '''
+
     # look for team members for support for fighting
     nearbyTeamUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, unitInfo.myTeam)
     for nearbyTeamUnit in nearbyTeamUnits:
@@ -311,7 +312,6 @@ def runMageLogic(unit, unitInfo, mapInfo, gc):
                                 #gc.move_robot(unit.id, direction)
                                 move.goto(gc, unit.id, unitLocation.add(direction))
                                 return
-    '''
 
     if not gc.is_move_ready(unit.id):
         return
@@ -346,6 +346,7 @@ def runMageLogic(unit, unitInfo, mapInfo, gc):
                 return
 
     return
+'''
 
 def runHealerLogic(unit, unitInfo, mapInfo, gc):
     # If healer is in garrison or space, then do nothing
@@ -362,7 +363,7 @@ def runHealerLogic(unit, unitInfo, mapInfo, gc):
         if unit.location.map_location().planet == bc.Planet.Earth:
             FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.earthFriendlyUnitsLocation)
         else:
-            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.MarsFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.marsFriendlyUnitsLocation)
 
         if not FriendlyUnitLocation is None:
             direction = unitLocation.direction_to(FriendlyUnitLocation)
@@ -416,7 +417,7 @@ def runHealerLogic(unit, unitInfo, mapInfo, gc):
     if unit.location.map_location().planet == bc.Planet.Earth:
         FriendlyUnit = findFriendlyUnitLocation(gc, unit, unitInfo.earthFriendlyWoundedUnits)
     else:
-        FriendlyUnit = findFriendlyUnitLocation(gc, unit, unitInfo.MarsFriendlyWoundedUnits)
+        FriendlyUnit = findFriendlyUnitLocation(gc, unit, unitInfo.marsFriendlyWoundedUnits)
 
     if not FriendlyUnit is None:
         direction = unitLocation.direction_to(FriendlyUnit.location.map_location())

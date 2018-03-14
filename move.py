@@ -23,7 +23,11 @@ move_dict = {   "N":bc.Direction.North,
 
 
 def goto(gc, unit_id, dest):
-	earthMap = gc.starting_map(bc.Planet.Earth)
+	if dest.planet == bc.Planet.Earth:
+		planetMap = gc.starting_map(bc.Planet.Earth)
+	else:
+		planetMap = gc.starting_map(bc.Planet.Mars)
+
 	if gc.unit(unit_id).location.map_location() == dest: 
 		return
 	if gc.unit(unit_id).movement_heat() >= 10: 
@@ -32,13 +36,17 @@ def goto(gc, unit_id, dest):
 	for tilt in tryRotate:
 		d = rotate(toward, tilt)
 		newLoc = gc.unit(unit_id).location.map_location().add(d)
-		if newLoc.x <= earthMap.width and newLoc.y <= earthMap.height:
+		if newLoc.x <= planetMap.width and newLoc.y <= planetMap.height:
 			if gc.can_move(unit_id, d) and gc.unit(unit_id).movement_heat() < 10:
 				gc.move_robot(unit_id, d)
 
 # For fleeing from enemies
 def gofrom(gc, unit_id, dest):
-	earthMap = gc.starting_map(bc.Planet.Earth)
+	if dest.planet == bc.Planet.Earth: 
+		planetMap = gc.starting_map(bc.Planet.Earth)
+	else:
+		planetMap = gc.starting_map(bc.Planet.Mars)
+
 	if gc.unit(unit_id).location.map_location() == dest: 
 		return
 	if gc.unit(unit_id).movement_heat() >= 10: 
@@ -47,7 +55,7 @@ def gofrom(gc, unit_id, dest):
 	for tilt in tryRotateFrom:
 		d = rotate(toward, tilt)
 		newLoc = gc.unit(unit_id).location.map_location().add(d)
-		if newLoc.x <= earthMap.width and newLoc.y <= earthMap.height:
+		if newLoc.x <= planetMap.width and newLoc.y <= planetMap.height:
 			if gc.can_move(unit_id, d) and gc.unit(unit_id).movement_heat() < 10:
 				gc.move_robot(unit_id, d)
 

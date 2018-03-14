@@ -11,14 +11,9 @@ import fight
 import info
 import json
 
-def printTimeLeft(gc):
-    print("Time left: ", gc.get_time_left_ms())
-
 
 # Earth game logic
-def runEarth(gc, mapInfo):
-    unitInfo = info.UnitInfo(gc)
-
+def runEarth(gc, unitInfo, mapInfo):
     for worker in workersInformation.workersList:
         workers.runWorkerLogic(worker, unitInfo, workersInformation, gc)
 
@@ -36,14 +31,8 @@ def runEarth(gc, mapInfo):
         if unit.unit_type == bc.UnitType.Rocket:
            structure.runRocketLogic(unit, unitInfo, mapInfo, gc)
 
-    printTimeLeft(gc)
-
 # Mars game logic
-def runMars(gc, mapInfo):
-    unitInfo = info.UnitInfo(gc)
-
-    # if unitInfo.mars
-
+def runMars(gc, unitInfo, mapInfo):
     for worker in workersInformation.marsWorkersList:
         workers.runWorkerLogicMars(worker, workersInformation, gc) 
 
@@ -92,12 +81,15 @@ workersInformation.maxWorkers = min(totKarb / 150, 20)  #needs tweaking after te
 workersInformation.maxFactories = totKarb / 300
 
 gc.queue_research(bc.UnitType.Worker)
+gc.queue_research(bc.UnitType.Ranger)
+gc.queue_research(bc.UnitType.Ranger)
 gc.queue_research(bc.UnitType.Rocket)
 gc.queue_research(bc.UnitType.Knight)
 gc.queue_research(bc.UnitType.Ranger)
-gc.queue_research(bc.UnitType.Ranger)
-gc.queue_research(bc.UnitType.Ranger)
-gc.queue_research(bc.UnitType.Mage)
+gc.queue_research(bc.UnitType.Knight)
+gc.queue_research(bc.UnitType.Knight)
+gc.queue_research(bc.UnitType.Healer)
+gc.queue_research(bc.UnitType.Healer)
 gc.queue_research(bc.UnitType.Healer)
 
 
@@ -108,12 +100,13 @@ gc.queue_research(bc.UnitType.Healer)
 
 while True:
     try:
+        unitInfo = info.UnitInfo(gc)
         if(gc.planet() == bc.Planet.Earth):
             #example usage for move
             #move.move(gc, gc.my_units()[0], grid, (20,20))
-            runEarth(gc, mapInfo)
+            runEarth(gc, unitInfo, mapInfo)
         else:
-            runMars(gc, mapInfo)
+            runMars(gc, unitInfo, mapInfo)
 
     except Exception as e:
         print('Error:', e)

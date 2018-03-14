@@ -9,7 +9,6 @@ import json
 class Worker():
 
     def __init__(self, id):
-        print("Making worker: ", id)
         self.factoryBuildID = 0
         self.hasPlan = False
         self.workerUnitID = id
@@ -156,7 +155,6 @@ def runWorkerLogic(worker, unitInfo, workersInformation, gc):
                     for unit in gc.sense_nearby_units(unitLocation.add(direction), 0):
                         if unit.unit_type==bc.UnitType.Factory:
                             worker.factoryBuildID = unit.id
-                            print("Blueprinting")
                     return
 
     # If there is no rocket, then build one
@@ -228,8 +226,6 @@ def runWorkerLogicMars(worker, workersInformation, gc):
             if gc.karbonite_at(adjacentLocation) > 0:
                 if gc.can_harvest(worker.workerUnitID, direction):
                     gc.harvest(worker.workerUnitID, direction)
-
-                    print("Harvesting")
                     return
         except Exception as e:
             continue
