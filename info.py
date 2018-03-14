@@ -29,26 +29,28 @@ class UnitInfo():
         self.marsFactoryCount = self.marsWorkerCount = self.marsKnightCount = self.marsRangerCount = 0
         self.marsMageCount = self.marsHealerCount = self.marsRocketCount = 0
 
-        self.earthVisibleEnemyUnits = []
-        self.marsVisibleEnemyUnits = []
+        self.earthVisibleEnemyUnitsLocation = []
+        self.marsVisibleEnemyUnitsLocation = []
 
-        self.earthFriendlyUnits = []
-        self.marsFriendlyUnits = []
+        self.earthFriendlyUnitsLocation = []
+        self.marsFriendlyUnitsLocation = []
 
-        self.earthFriendlyWoundedUnits = []
-        self.marsFriendlyWoundedUnits = []
+        self.earthFriendlyWoundedUnitsLocation = []
+        self.marsFriendlyWoundedUnitsLocation = []
 
         self.Research = bc.ResearchInfo()
 
         for unit in gc.my_units():
-            if unit.location.is_on_planet(bc.Planet.Earth):
-                self.earthFriendlyUnits.append(unit)
-                if unit.health < unit.max_health:
-                    self.earthFriendlyWoundedUnits.append(unit)
-            elif unit.location.is_on_planet(bc.Planet.Mars):
-                self.marsFriendlyUnits.append(unit)
-                if unit.health < unit.max_health:
-                    self.marsFriendlyWoundedUnits.append(unit)
+            loc = unit.location
+            if loc.is_on_map():
+                if unit.location.is_on_planet(bc.Planet.Earth):
+                    self.earthFriendlyUnitsLocation.append(loc.map_location())
+                    if unit.health < unit.max_health:
+                        self.earthFriendlyWoundedUnitsLocation.append(loc.map_location())
+                elif unit.location.is_on_planet(bc.Planet.Mars):
+                    self.marsFriendlyUnitsLocation.append(unit.location.map_location())
+                    if unit.health < unit.max_health:
+                        self.marsFriendlyWoundedUnitsLocation.append(unit.location.map_location())
 
             if (unit.unit_type == bc.UnitType.Factory):
                 self.factoryCount += 1
@@ -95,9 +97,15 @@ class UnitInfo():
 
             
             if(unit.location.is_on_map() and unit.location.is_on_planet(bc.Planet.Earth)):
-                self.earthVisibleEnemyUnits.extend(gc.sense_nearby_units_by_team(unit.location.map_location(), unit.vision_range, self.enemyTeam))
+                for enemyUnit in gc.sense_nearby_units_by_team(unit.location.map_location(), unit.vision_range, self.enemyTeam):
+                    loc = enemyUnit.location                    
+                    if loc.is_on_map():
+                        self.earthVisibleEnemyUnitsLocation.append(loc.map_location())
             if(unit.location.is_on_map() and unit.location.is_on_planet(bc.Planet.Mars)):
-                self.marsVisibleEnemyUnits.extend(gc.sense_nearby_units_by_team(unit.location.map_location(), unit.vision_range, self.enemyTeam))
+                for enemyUnit in gc.sense_nearby_units_by_team(unit.location.map_location(), unit.vision_range, self.enemyTeam):
+                    loc = enemyUnit.location                    
+                    if loc.is_on_map():
+                        self.marsVisibleEnemyUnitsLocation.append(loc.map_location())
 
 
         self.totalCount = len(gc.my_units())

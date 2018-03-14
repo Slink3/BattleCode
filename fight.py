@@ -3,46 +3,71 @@ import random
 import info
 import move
 
-def findClosestEnemyUnit(unit, enemyUnits):
-    closestEnemyUnit = None
+from datetime import datetime
 
-    if len(enemyUnits) > 0:
-        closestEnemyUnit = enemyUnits[0]
+def findClosestEnemyUnit(unit, enemyUnitsLocation):
 
-    for enemyUnit in enemyUnits:
-        if enemyUnit.location.is_on_map():
-            if (unit.location.map_location().distance_squared_to(enemyUnit.location.map_location()) < unit.location.map_location().distance_squared_to(closestEnemyUnit.location.map_location())):
-                closestEnemyUnit = enemyUnit
+    before = datetime.now()
 
-    return closestEnemyUnit
+    closestEnemyUnitLocation = None
+    
+    unitLocation = unit.location.map_location()
 
-def findClosestFriendlyUnit(unit, friendlyUnits):
-    closestFriendlyUnit = None
+    if len(enemyUnitsLocation) > 0:
+        closestEnemyUnitLocation = enemyUnitsLocation[0]
+        closestEnemyDistance = unitLocation.distance_squared_to(closestEnemyUnitLocation)
 
-    for friendlyUnit in friendlyUnits:
-        if friendlyUnit is not unit:
-            if friendlyUnit.location.is_on_map():
-                closestFriendlyUnit = friendlyUnit
-                break
+    '''
+    for enemyUnitLocation in enemyUnitsLocation:
+        enemyUnitDistance = unitLocation.distance_squared_to(enemyUnitLocation)
+        if enemyUnitDistance < closestEnemyDistance:
+            closestEnemyUnitLocation = enemyUnitLocation
+            closestEnemyDistance = enemyUnitDistance
+    '''
 
-    if not closestFriendlyUnit is None:
-        for friendlyUnit in friendlyUnits:
-            if friendlyUnit is not unit:
-                if friendlyUnit.location.is_on_map():
-                    if unit.location.map_location().distance_squared_to(friendlyUnit.location.map_location()) < unit.location.map_location().distance_squared_to(closestFriendlyUnit.location.map_location()):
-                        closestFriendlyUnit = friendlyUnit
+    
+    #print("FINDCLOSESTENEMYUNIT TOOK TIME: ", datetime.now() - before)
+
+    return closestEnemyUnitLocation
+
+def findClosestFriendlyUnit(unit, friendlyUnitsLocation):
+    before = datetime.now()
+    closestFriendlyUnitLocation = None
+
+    unitLocation = unit.location.map_location()
+
+    for friendlyUnitLocation in friendlyUnitsLocation:
+        if friendlyUnitLocation is not unitLocation:
+            closestFriendlyUnitLocation = friendlyUnitLocation
+            closestFriendlyUnitDistance = unitLocation.distance_squared_to(friendlyUnitLocation)
+            break
+
+    '''
+    if not closestFriendlyUnitLocation is None:
+        for friendlyUnitLocation in friendlyUnitsLocation:
+            if friendlyUnitLocation is not unitLocation:
+                friendlyUnitDistance = unitLocation.distance_squared_to(friendlyUnitLocation)
+                if friendlyUnitDistance < closestFriendlyUnitDistance:
+                    closestFriendlyUnitLocation = friendlyUnitLocation
+                    closestFriendlyUnitDistance = friendlyUnitDistance
+    '''
                 
-    return closestFriendlyUnit
+    #print("FINDCLOSESTFRIENDLYUNIT TOOK TIME: ", datetime.now() - before)
 
-def findClosestFriendlyWoundedUnit(unit, friendlyUnits):
-    closestWoundedFriendlyUnit = None
+    return closestFriendlyUnitLocation
 
-    woundedFriendlyUnits = []
-    for woundedFriendlyUnit in woundedFriendlyUnits:
-        if woundedFriendlyUnit is not unit:
-            if woundedFriendlyUnit.location.is_on_map():
-                if woundedFriendlyUnit.health < woundedFriendlyUnit.maxHealth:
-                    woundedFriendlyUnits.append(woundedFriendlyUnit)
+'''
+def findClosestFriendlyWoundedUnit(unit, friendlyUnitslocation):
+    before = datetime.now()
+    closestWoundedFriendlyUnitLocation = None
+
+    unitLocation = unit.location.map_location()
+
+    woundedFriendlyUnitsLocation = []
+    for friendlyUnitlocation in friendlyUnitslocation:
+        if friendlyUnitlocation is not unitLocation:
+            if woundedFriendlyUnit.health < woundedFriendlyUnit.maxHealth:
+                woundedFriendlyUnits.append(woundedFriendlyUnit)
     
     if(len(woundedFriendlyUnits) > 0):
         closestWoundedFriendlyUnit = woundedFriendlyUnits[0]
@@ -51,7 +76,10 @@ def findClosestFriendlyWoundedUnit(unit, friendlyUnits):
         if unit.location.map_location().distance_squared_to(woundedFriendlyUnit.location.map_location()) < unit.location.map_location().distance_squared_to(closestWoundedFriendlyUnit.location.map_location()):
             closestWoundedFriendlyUnit = woundedFriendlyUnit
 
+    print("FINDCLOSESTWOUNDEDFRINEDLYUNIT TOOK TIME: ", datetime.now() - before)
+
     return closestWoundedFriendlyUnit
+'''
 
 # Unit game logic
 def runKnightLogic(unit, unitInfo, mapInfo, gc):
@@ -63,18 +91,20 @@ def runKnightLogic(unit, unitInfo, mapInfo, gc):
     unitLocation = unit.location.map_location()
 
     if not gc.is_attack_ready(unit.id):
-        if unit.location.map_location().planet == bc.Planet.Earth:
-            closestFriendlyUnit = findClosestFriendlyUnit(unit, unitInfo.earthFriendlyUnits)
-        else:
-            closestFriendlyUnit = findClosestFriendlyUnit(unit, unitInfo.MarsFriendlyUnits)
+        if not gc.is_move_ready(unit.id):
+            return
 
-        if not closestFriendlyUnit is None:
-            direction = unitLocation.direction_to(closestFriendlyUnit.location.map_location())
-            if gc.is_move_ready(unit.id):
-                if gc.can_move(unit.id, direction):
-                    #gc.move_robot(unit.id, direction)
-                    move.goto(gc, unit.id, unitLocation.add(direction))
-                    return
+        if unit.location.map_location().planet == bc.Planet.Earth:
+            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.earthFriendlyUnitsLocation)
+        else:
+            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.MarsFriendlyUnitsLocation)
+
+        if not closestFriendlyUnitLocation is None:
+            direction = unitLocation.direction_to(closestFriendlyUnitLocation)
+            if gc.can_move(unit.id, direction):
+                #gc.move_robot(unit.id, direction)
+                move.goto(gc, unit.id, unitLocation.add(direction))
+                return
         return
 
 
@@ -82,22 +112,23 @@ def runKnightLogic(unit, unitInfo, mapInfo, gc):
     randomDirections = move.directions
     random.shuffle(randomDirections)
 
-    javelinRangeEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.ability_range(), unitInfo.enemyTeam)
-    for javelinRangeEnemyUnit in javelinRangeEnemyUnits:
-        # If there are enemy units in ability range, then try to javelin them
-        if unit.is_ability_unlocked():
-            if gc.is_javelin_ready(unit.id):
+    
+    # If there are enemy units in ability range, then try to javelin them
+    if unit.is_ability_unlocked():
+        if gc.is_javelin_ready(unit.id):
+            javelinRangeEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.ability_range(), unitInfo.enemyTeam)
+            for javelinRangeEnemyUnit in javelinRangeEnemyUnits:
                 if gc.can_javelin(unit.id, javelinRangeEnemyUnit.id):
                     gc.javelin(unit.id, javelinRangeEnemyUnit.id)
                     return
 
+
+    # If there are enemy melee range, then try to attack them
     meleeRangeEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.attack_range(), unitInfo.enemyTeam)
     for meleeRangeEnemyUnit in meleeRangeEnemyUnits:
-        # If there are enemy melee range, then try to attack them
-        if gc.is_attack_ready(unit.id):
-            if gc.can_attack(unit.id, meleeRangeEnemyUnit.id):
-                gc.attack(unit.id, meleeRangeEnemyUnit.id)
-                return
+        if gc.can_attack(unit.id, meleeRangeEnemyUnit.id):
+            gc.attack(unit.id, meleeRangeEnemyUnit.id)
+            return
 
     '''
     visibleEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, unitInfo.enemyTeam)
@@ -110,37 +141,37 @@ def runKnightLogic(unit, unitInfo, mapInfo, gc):
                 move.goto(gc, unit.id, unitLocation.add(direction))
                 return
     '''
+
+    if not gc.is_move_ready(unit.id):
+        return
         
     # Try to move to closest enemy unit
     if unit.location.map_location().planet == bc.Planet.Earth:
-        closestEnemyUnit = findClosestEnemyUnit(unit, unitInfo.earthVisibleEnemyUnits)
+        closestEnemyUnitLocation = findClosestEnemyUnit(unit, unitInfo.earthVisibleEnemyUnitsLocation)
     else:
-        closestEnemyUnit = findClosestEnemyUnit(unit, unitInfo.marsVisibleEnemyUnits)
+        closestEnemyUnitLocation = findClosestEnemyUnit(unit, unitInfo.marsVisibleEnemyUnitsLocation)
 
-    if not closestEnemyUnit is None:
-        direction = unitLocation.direction_to(closestEnemyUnit.location.map_location())
-        if gc.is_move_ready(unit.id):
-            if gc.can_move(unit.id, direction):
-                #gc.move_robot(unit.id, direction)
-                move.goto(gc, unit.id, unitLocation.add(direction))
-                return
+    if not closestEnemyUnitLocation is None:
+        direction = unitLocation.direction_to(closestEnemyUnitLocation)
+        if gc.can_move(unit.id, direction):
+            #gc.move_robot(unit.id, direction)
+            move.goto(gc, unit.id, unitLocation.add(direction))
+            return
 
     # Try to move to starting enemy location
     for startingEnemyLocation in mapInfo.startingEnemyLocations:
         direction = unitLocation.direction_to(startingEnemyLocation)
-        if gc.is_move_ready(unit.id):
-            if gc.can_move(unit.id, direction):
-                #gc.move_robot(unit.id, direction)
-                move.goto(gc, unit.id, unitLocation.add(direction))
-                return
+        if gc.can_move(unit.id, direction):
+            #gc.move_robot(unit.id, direction)
+            move.goto(gc, unit.id, unitLocation.add(direction))
+            return
 
     # Move randomly
     for direction in randomDirections:
-        if gc.is_move_ready(unit.id):
-            if gc.can_move(unit.id, direction):
-                #gc.move_robot(unit.id, direction)
-                move.goto(gc, unit.id, unitLocation.add(direction))
-                return
+        if gc.can_move(unit.id, direction):
+            #gc.move_robot(unit.id, direction)
+            move.goto(gc, unit.id, unitLocation.add(direction))
+            return
 
     return
 
@@ -150,19 +181,22 @@ def runRangerLogic(unit, unitInfo, mapInfo, gc):
         return
 
     if unit.ranger_is_sniping():
-        return # TODO: 
+        return
 
     # Current location of the unit
     unitLocation = unit.location.map_location()
 
     if not gc.is_attack_ready(unit.id):
-        if unit.location.map_location().planet == bc.Planet.Earth:
-            closestFriendlyUnit = findClosestFriendlyUnit(unit, unitInfo.earthFriendlyUnits)
-        else:
-            closestFriendlyUnit = findClosestFriendlyUnit(unit, unitInfo.MarsFriendlyUnits)
+        if not gc.is_move_ready(unit.id):
+            return
 
-        if not closestFriendlyUnit is None:
-            direction = unitLocation.direction_to(closestFriendlyUnit.location.map_location())
+        if unit.location.map_location().planet == bc.Planet.Earth:
+            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.earthFriendlyUnitsLocation)
+        else:
+            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.MarsFriendlyUnitsLocation)
+
+        if not closestFriendlyUnitLocation is None:
+            direction = unitLocation.direction_to(closestFriendlyUnitLocation)
             if gc.is_move_ready(unit.id):
                 if gc.can_move(unit.id, direction):
                     #gc.move_robot(unit.id, direction)
@@ -177,26 +211,26 @@ def runRangerLogic(unit, unitInfo, mapInfo, gc):
     # Attack the closest units
     nearbyEnemyUnits = gc.sense_nearby_units_by_team(unitLocation, unit.attack_range(), unitInfo.enemyTeam)
     for nearbyEnemyUnit in nearbyEnemyUnits:
-        if gc.is_attack_ready(unit.id):
-            if gc.can_attack(unit.id, nearbyEnemyUnit.id):
-                gc.attack(unit.id, nearbyEnemyUnit.id)
-                return
+        if gc.can_attack(unit.id, nearbyEnemyUnit.id):
+            gc.attack(unit.id, nearbyEnemyUnit.id)
+            return
+    
+    # If there are enemy units in ability range, then try to snipe them
+    if unit.is_ability_unlocked():
+        if gc.is_begin_snipe_ready(unit.id):
+            if unit.location.map_location().planet == bc.Planet.Earth:
+                visibleEnemyUnitsLocation = unitInfo.earthVisibleEnemyUnitsLocation
+            else:
+                visibleEnemyUnitsLocation = unitInfo.marsVisibleEnemyUnitsLocation
 
-    if unit.location.map_location().planet == bc.Planet.Earth:
-        visibleEnemyUnits = unitInfo.earthVisibleEnemyUnits
-    else:
-        visibleEnemyUnits = unitInfo.marsVisibleEnemyUnits
-
-    for eachEnemyUnit in visibleEnemyUnits:
-        # Snipe only knights, rangers and mages
-        if eachEnemyUnit.unit_type == bc.UnitType.Worker or eachEnemyUnit.unit_type == bc.UnitType.Rocket or eachEnemyUnit.unit_type == bc.UnitType.Factory:
-            break
-
-        # If there are enemy units in ability range, then try to snipe them
-        if unit.is_ability_unlocked():
-            if gc.is_begin_snipe_ready(unit.id):
-                if gc.can_begin_snipe(unit.id, eachEnemyUnit.location.map_location()):
-                    gc.begin_snipe(unit.id, eachEnemyUnit.location.map_location())
+            for eachEnemyUnitLocation in visibleEnemyUnitsLocation:
+                '''
+                # Snipe only knights, rangers and mages
+                if eachEnemyUnitLocation.unit_type == bc.UnitType.Worker or eachEnemyUnitLocation.unit_type == bc.UnitType.Rocket or eachEnemyUnitLocation.unit_type == bc.UnitType.Factory:
+                    break
+                '''
+                if gc.can_begin_snipe(unit.id, eachEnemyUnitLocation):
+                    gc.begin_snipe(unit.id, eachEnemyUnitLocation)
                     return
 
     '''
@@ -211,36 +245,36 @@ def runRangerLogic(unit, unitInfo, mapInfo, gc):
                 return
     '''
         
+    if not gc.is_move_ready(unit.id):
+        return
+
     # Try to move to closest enemyUnit
     if unit.location.map_location().planet == bc.Planet.Earth:
-        closestEnemyUnit = findClosestEnemyUnit(unit, unitInfo.earthVisibleEnemyUnits)
+        closestEnemyUnitLocation = findClosestEnemyUnit(unit, unitInfo.earthVisibleEnemyUnitsLocation)
     else:
-        closestEnemyUnit = findClosestEnemyUnit(unit, unitInfo.marsVisibleEnemyUnits)
+        closestEnemyUnitLocation = findClosestEnemyUnit(unit, unitInfo.marsVisibleEnemyUnitsLocation)
 
-    if not closestEnemyUnit is None:
-        direction = unitLocation.direction_to(closestEnemyUnit.location.map_location())
-        if gc.is_move_ready(unit.id):
-            if gc.can_move(unit.id, direction):
-                #gc.move_robot(unit.id, direction)
-                move.goto(gc, unit.id, unitLocation.add(direction))
-                return
+    if not closestEnemyUnitLocation is None:
+        direction = unitLocation.direction_to(closestEnemyUnitLocation)
+        if gc.can_move(unit.id, direction):
+            #gc.move_robot(unit.id, direction)
+            move.goto(gc, unit.id, unitLocation.add(direction))
+            return
 
     # Try to move to starting enemy location
     for startingEnemyLocation in mapInfo.startingEnemyLocations:
         direction = unitLocation.direction_to(startingEnemyLocation)
-        if gc.is_move_ready(unit.id):
-            if gc.can_move(unit.id, direction):
-                #gc.move_robot(unit.id, direction)
-                move.goto(gc, unit.id, unitLocation.add(direction))
-                return
+        if gc.can_move(unit.id, direction):
+            #gc.move_robot(unit.id, direction)
+            move.goto(gc, unit.id, unitLocation.add(direction))
+            return
 
     # Move randomly
     for direction in randomDirections:
-        if gc.is_move_ready(unit.id):
-            if gc.can_move(unit.id, direction):
-                #gc.move_robot(unit.id, direction)
-                move.goto(gc, unit.id, unitLocation.add(direction))
-                return
+        if gc.can_move(unit.id, direction):
+            #gc.move_robot(unit.id, direction)
+            move.goto(gc, unit.id, unitLocation.add(direction))
+            return
 
     return
 
@@ -253,18 +287,20 @@ def runMageLogic(unit, unitInfo, mapInfo, gc):
     unitLocation = unit.location.map_location()
 
     if not gc.is_attack_ready(unit.id):
+        if not gc.is_move_ready(unit.id):
+            return
+        
         if unit.location.map_location().planet == bc.Planet.Earth:
-            closestFriendlyUnit = findClosestFriendlyUnit(unit, unitInfo.earthFriendlyUnits)
+            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.earthFriendlyUnitsLocation)
         else:
-            closestFriendlyUnit = findClosestFriendlyUnit(unit, unitInfo.MarsFriendlyUnits)
+            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.MarsFriendlyUnitsLocation)
 
-        if not closestFriendlyUnit is None:
-            direction = unitLocation.direction_to(closestFriendlyUnit.location.map_location())
-            if gc.is_move_ready(unit.id):
-                if gc.can_move(unit.id, direction):
-                    #gc.move_robot(unit.id, direction)
-                    move.goto(gc, unit.id, unitLocation.add(direction))
-                    return
+        if not closestFriendlyUnitLocation is None:
+            direction = unitLocation.direction_to(closestFriendlyUnitLocation)
+            if gc.can_move(unit.id, direction):
+                #gc.move_robot(unit.id, direction)
+                move.goto(gc, unit.id, unitLocation.add(direction))
+                return
         return
 
     # Randomize array of directions each turn
@@ -305,28 +341,29 @@ def runMageLogic(unit, unitInfo, mapInfo, gc):
                                 return
     '''
 
+    if not gc.is_move_ready(unit.id):
+        return
+
     # Try to move to closest enemyUnit
     if unit.location.map_location().planet == bc.Planet.Earth:
-        closestEnemyUnit = findClosestEnemyUnit(unit, unitInfo.earthVisibleEnemyUnits)
+        closestEnemyUnitLocation = findClosestEnemyUnit(unit, unitInfo.earthVisibleEnemyUnitsLocation)
     else:
-        closestEnemyUnit = findClosestEnemyUnit(unit, unitInfo.marsVisibleEnemyUnits)
+        closestEnemyUnitLocation = findClosestEnemyUnit(unit, unitInfo.marsVisibleEnemyUnitsLocation)
         
-    if not closestEnemyUnit is None:
-        direction = unitLocation.direction_to(closestEnemyUnit.location.map_location())
-        if gc.is_move_ready(unit.id):
-            if gc.can_move(unit.id, direction):
-                #gc.move_robot(unit.id, direction)
-                move.goto(gc, unit.id, unitLocation.add(direction))
-                return
+    if not closestEnemyUnitLocation is None:
+        direction = unitLocation.direction_to(closestEnemyUnitLocation)
+        if gc.can_move(unit.id, direction):
+            #gc.move_robot(unit.id, direction)
+            move.goto(gc, unit.id, unitLocation.add(direction))
+            return
 
     # Try to move to starting enemy location
     for startingEnemyLocation in mapInfo.startingEnemyLocations:
         direction = unitLocation.direction_to(startingEnemyLocation)
-        if gc.is_move_ready(unit.id):
-            if gc.can_move(unit.id, direction):
-                #gc.move_robot(unit.id, direction)
-                move.goto(gc, unit.id, unitLocation.add(direction))
-                return
+        if gc.can_move(unit.id, direction):
+            #gc.move_robot(unit.id, direction)
+            move.goto(gc, unit.id, unitLocation.add(direction))
+            return
 
     # Move randomly
     for direction in randomDirections:
@@ -347,18 +384,20 @@ def runHealerLogic(unit, unitInfo, mapInfo, gc):
     unitLocation = unit.location.map_location()
 
     if gc.is_heal_ready(unit.id):
-        if unit.location.map_location().planet == bc.Planet.Earth:
-            closestFriendlyUnit = findClosestFriendlyUnit(unit, unitInfo.earthFriendlyUnits)
-        else:
-            closestFriendlyUnit = findClosestFriendlyUnit(unit, unitInfo.MarsFriendlyUnits)
+        if not gc.is_move_ready(unit.id):
+            return
 
-        if not closestFriendlyUnit is None:
-            direction = unitLocation.direction_to(closestFriendlyUnit.location.map_location())
-            if gc.is_move_ready(unit.id):
-                if gc.can_move(unit.id, direction):
-                    #gc.move_robot(unit.id, direction)
-                    move.goto(gc, unit.id, unitLocation.add(direction))
-                    return
+        if unit.location.map_location().planet == bc.Planet.Earth:
+            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.earthFriendlyUnitsLocation)
+        else:
+            closestFriendlyUnitLocation = findClosestFriendlyUnit(unit, unitInfo.MarsFriendlyUnitsLocation)
+
+        if not closestFriendlyUnitLocation is None:
+            direction = unitLocation.direction_to(closestFriendlyUnitLocation.location.map_location())
+            if gc.can_move(unit.id, direction):
+                #gc.move_robot(unit.id, direction)
+                move.goto(gc, unit.id, unitLocation.add(direction))
+                return
         return
 
 
@@ -367,13 +406,13 @@ def runHealerLogic(unit, unitInfo, mapInfo, gc):
     directions = list(bc.Direction)
     random.shuffle(directions)
 
+
     nearbyAlliedUnits = gc.sense_nearby_units_by_team(unitLocation, unit.attack_range(), unitInfo.myTeam)
     for nearbyAlliedUnit in nearbyAlliedUnits:
         # If there are wounded allied units nearby, then try to heal them
-        if gc.is_heal_ready(unit.id):
-            if gc.can_heal(unit.id, nearbyAlliedUnit.id):
-                gc.heal(unit.id, nearbyAlliedUnit.id)
-                return
+        if gc.can_heal(unit.id, nearbyAlliedUnit.id):
+            gc.heal(unit.id, nearbyAlliedUnit.id)
+            return
 
     '''
     visibleAlliedUnits = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, unitInfo.myTeam)
@@ -387,6 +426,9 @@ def runHealerLogic(unit, unitInfo, mapInfo, gc):
                 return
     '''
 
+    if not gc.is_move_ready(unit.id):
+        return
+
     # If there are visible enemy units nearby, just run!
     enemies = gc.sense_nearby_units_by_team(unitLocation, unit.vision_range, unitInfo.enemyTeam)
     if len(enemies) > 0:
@@ -397,9 +439,9 @@ def runHealerLogic(unit, unitInfo, mapInfo, gc):
             #gc.move_robot(unit.id, reverseEnemyDirection)
             move.goto(gc, unit.id, unitLocation.add(reverseEnemyDirection))
             return
-            
 
     # Try to move to closest friendly unit
+    '''
     if unit.location.map_location().planet == bc.Planet.Earth:
         closestFriendlyUnit = findClosestFriendlyWoundedUnit(unit, unitInfo.earthFriendlyWoundedUnits)
     else:
@@ -412,22 +454,21 @@ def runHealerLogic(unit, unitInfo, mapInfo, gc):
                 #gc.move_robot(unit.id, direction)
                 move.goto(gc, unit.id, unitLocation.add(direction))
                 return
+    '''
 
     # Try to move to starting enemy location
     for startingEnemyLocation in mapInfo.startingEnemyLocations:
         direction = unitLocation.direction_to(startingEnemyLocation)
-        if gc.is_move_ready(unit.id):
-            if gc.can_move(unit.id, direction):
-                #gc.move_robot(unit.id, direction)
-                move.goto(gc, unit.id, unitLocation.add(direction))
-                return
+        if gc.can_move(unit.id, direction):
+            #gc.move_robot(unit.id, direction)
+            move.goto(gc, unit.id, unitLocation.add(direction))
+            return
 
     # Move randomly
     for direction in randomDirections:
-        if gc.is_move_ready(unit.id):
-            if gc.can_move(unit.id, direction):
-                #gc.move_robot(unit.id, direction)
-                move.goto(gc, unit.id, unitLocation.add(direction))
-                return
+        if gc.can_move(unit.id, direction):
+            #gc.move_robot(unit.id, direction)
+            move.goto(gc, unit.id, unitLocation.add(direction))
+            return
 
     return
