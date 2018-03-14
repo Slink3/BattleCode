@@ -348,7 +348,7 @@ def runHealerLogic(unit, unitInfo, mapInfo, gc):
             FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.MarsFriendlyUnitsLocation)
 
         if not FriendlyUnitLocation is None:
-            direction = unitLocation.direction_to(FriendlyUnitLocation.location.map_location())
+            direction = unitLocation.direction_to(FriendlyUnitLocation)
             if gc.can_move(unit.id, direction):
                 #gc.move_robot(unit.id, direction)
                 move.goto(gc, unit.id, unitLocation.add(direction))
