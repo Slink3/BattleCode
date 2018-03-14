@@ -3,38 +3,55 @@ import random
 import info
 import move
 
-def findEnemyUnitLocation(unit, enemyUnitsLocation):
-    enemyUnitLocation = None
+def findEnemyUnitLocation(gc, unit, enemyUnitsLocation):
+    closestEnemyUnitLocation = None
+    
+    unitLocation = unit.location.map_location()
 
     if len(enemyUnitsLocation) > 0:
-        enemyUnitLocation = enemyUnitsLocation[0]
+        closestEnemyUnitLocation = enemyUnitsLocation[0]
 
-    return enemyUnitLocation
+        # To prevent timeout
+        if(gc.get_time_left_ms() < 5000):
+            return closestEnemyUnitLocation
 
-def findFriendlyUnitLocation(unit, friendlyUnitsLocation):
-    FriendlyUnitLocation = None
+        closestEnemyUnitDistance = unitLocation.distance_squared_to(closestEnemyUnitLocation)
+
+
+    for enemyUnitLocation in enemyUnitsLocation:
+        enemyUnitDistance = unitLocation.distance_squared_to(enemyUnitLocation)
+        if enemyUnitDistance < closestEnemyUnitDistance:
+            closestEnemyUnitLocation = enemyUnitLocation
+            closestEnemyUnitDistance = enemyUnitDistance
+
+    return closestEnemyUnitLocation
+
+def findFriendlyUnitLocation(gc, unit, friendlyUnitsLocation):
+    closestFriendlyUnitLocation = None
 
     unitLocation = unit.location.map_location()
 
     for friendlyUnitLocation in friendlyUnitsLocation:
         if friendlyUnitLocation is not unitLocation:
-            FriendlyUnitLocation = friendlyUnitLocation
+            closestFriendlyUnitLocation = friendlyUnitLocation
+
+            # To prevent timeout
+            if(gc.get_time_left_ms() < 5000):
+                return closestEnemyUnitLocation
+
+            closestFriendlyUnitDistance = unitLocation.distance_squared_to(closestFriendlyUnitLocation)
             break
 
-    return FriendlyUnitLocation
+    if not closestFriendlyUnitLocation is None:
+        for friendlyUnitLocation in friendlyUnitsLocation:
+            if friendlyUnitLocation is not unitLocation:
+                friendlyUnitDistance = unitLocation.distance_squared_to(friendlyUnitLocation)
+                if friendlyUnitDistance < closestFriendlyUnitDistance:
+                    closestFriendlyUnitLocation = friendlyUnitLocation
+                    closestFriendlyUnitDistance = unitLocation.distance_squared_to(closestFriendlyUnitLocation)
+                
+    return closestFriendlyUnitLocation
 
-def findFriendlyWoundedUnitLocation(unit, friendlyUnitsLocation):
-    WoundedFriendlyUnitLocation = None
-
-    unitLocation = unit.location.map_location()
-
-    for friendlyUnitLocation in friendlyUnitsLocation:
-        if friendlyUnitLocation is not unitLocation:
-            friendlyUnit = gc.sense_unit_in_location(friendlyUnitLocation)
-            if friendlyUnit.health < friendlyUnit.maxHealth:
-                WoundedFriendlyUnitLocation = friendlyUnitLocation
-
-    return WoundedFriendlyUnitLocation
 
 # Unit game logic
 def runKnightLogic(unit, unitInfo, mapInfo, gc):
@@ -50,9 +67,9 @@ def runKnightLogic(unit, unitInfo, mapInfo, gc):
             return
 
         if unit.location.map_location().planet == bc.Planet.Earth:
-            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.earthFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.earthFriendlyUnitsLocation)
         else:
-            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.MarsFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.MarsFriendlyUnitsLocation)
 
         if not FriendlyUnitLocation is None:
             direction = unitLocation.direction_to(FriendlyUnitLocation)
@@ -102,9 +119,9 @@ def runKnightLogic(unit, unitInfo, mapInfo, gc):
         
     # Try to move to closest enemy unit
     if unit.location.map_location().planet == bc.Planet.Earth:
-        EnemyUnitLocation = findEnemyUnitLocation(unit, unitInfo.earthVisibleEnemyUnitsLocation)
+        EnemyUnitLocation = findEnemyUnitLocation(gc, unit, unitInfo.earthVisibleEnemyUnitsLocation)
     else:
-        EnemyUnitLocation = findEnemyUnitLocation(unit, unitInfo.marsVisibleEnemyUnitsLocation)
+        EnemyUnitLocation = findEnemyUnitLocation(gc, unit, unitInfo.marsVisibleEnemyUnitsLocation)
 
     if not EnemyUnitLocation is None:
         direction = unitLocation.direction_to(EnemyUnitLocation)
@@ -146,9 +163,9 @@ def runRangerLogic(unit, unitInfo, mapInfo, gc):
             return
 
         if unit.location.map_location().planet == bc.Planet.Earth:
-            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.earthFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.earthFriendlyUnitsLocation)
         else:
-            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.MarsFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.MarsFriendlyUnitsLocation)
 
         if not FriendlyUnitLocation is None:
             direction = unitLocation.direction_to(FriendlyUnitLocation)
@@ -205,9 +222,9 @@ def runRangerLogic(unit, unitInfo, mapInfo, gc):
 
     # Try to move to closest enemyUnit
     if unit.location.map_location().planet == bc.Planet.Earth:
-        EnemyUnitLocation = findEnemyUnitLocation(unit, unitInfo.earthVisibleEnemyUnitsLocation)
+        EnemyUnitLocation = findEnemyUnitLocation(gc, unit, unitInfo.earthVisibleEnemyUnitsLocation)
     else:
-        EnemyUnitLocation = findEnemyUnitLocation(unit, unitInfo.marsVisibleEnemyUnitsLocation)
+        EnemyUnitLocation = findEnemyUnitLocation(gc, unit, unitInfo.marsVisibleEnemyUnitsLocation)
 
     if not EnemyUnitLocation is None:
         direction = unitLocation.direction_to(EnemyUnitLocation)
@@ -246,9 +263,9 @@ def runMageLogic(unit, unitInfo, mapInfo, gc):
             return
         
         if unit.location.map_location().planet == bc.Planet.Earth:
-            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.earthFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.earthFriendlyUnitsLocation)
         else:
-            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.MarsFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.MarsFriendlyUnitsLocation)
 
         if not FriendlyUnitLocation is None:
             direction = unitLocation.direction_to(FriendlyUnitLocation)
@@ -301,9 +318,9 @@ def runMageLogic(unit, unitInfo, mapInfo, gc):
 
     # Try to move to closest enemyUnit
     if unit.location.map_location().planet == bc.Planet.Earth:
-        EnemyUnitLocation = findEnemyUnitLocation(unit, unitInfo.earthVisibleEnemyUnitsLocation)
+        EnemyUnitLocation = findEnemyUnitLocation(gc, unit, unitInfo.earthVisibleEnemyUnitsLocation)
     else:
-        EnemyUnitLocation = findEnemyUnitLocation(unit, unitInfo.marsVisibleEnemyUnitsLocation)
+        EnemyUnitLocation = findEnemyUnitLocation(gc, unit, unitInfo.marsVisibleEnemyUnitsLocation)
         
     if not EnemyUnitLocation is None:
         direction = unitLocation.direction_to(EnemyUnitLocation)
@@ -343,9 +360,9 @@ def runHealerLogic(unit, unitInfo, mapInfo, gc):
             return
 
         if unit.location.map_location().planet == bc.Planet.Earth:
-            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.earthFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.earthFriendlyUnitsLocation)
         else:
-            FriendlyUnitLocation = findFriendlyUnitLocation(unit, unitInfo.MarsFriendlyUnitsLocation)
+            FriendlyUnitLocation = findFriendlyUnitLocation(gc, unit, unitInfo.MarsFriendlyUnitsLocation)
 
         if not FriendlyUnitLocation is None:
             direction = unitLocation.direction_to(FriendlyUnitLocation)
@@ -397,9 +414,9 @@ def runHealerLogic(unit, unitInfo, mapInfo, gc):
 
     # Try to move to closest friendly unit
     if unit.location.map_location().planet == bc.Planet.Earth:
-        FriendlyUnit = findFriendlyWoundedUnitLocation(unit, unitInfo.earthFriendlyWoundedUnits)
+        FriendlyUnit = findFriendlyUnitLocation(gc, unit, unitInfo.earthFriendlyWoundedUnits)
     else:
-        FriendlyUnit = findFriendlyWoundedUnitLocation(unit, unitInfo.MarsFriendlyWoundedUnits)
+        FriendlyUnit = findFriendlyUnitLocation(gc, unit, unitInfo.MarsFriendlyWoundedUnits)
 
     if not FriendlyUnit is None:
         direction = unitLocation.direction_to(FriendlyUnit.location.map_location())
