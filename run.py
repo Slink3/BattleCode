@@ -73,9 +73,9 @@ def runEarth(gc, mapInfo):
 
 # Mars game logic
 def runMars(gc, mapInfo):
-   # unitInfo = info.UnitInfo(gc)
+    unitInfo = info.UnitInfo(gc)
 
-    '''# if unitInfo.mars
+    # if unitInfo.mars
 
     for worker in workersInformation.marsWorkersList:
         workers.runWorkerLogicMars(worker, workersInformation, gc) 
@@ -94,7 +94,7 @@ def runMars(gc, mapInfo):
         elif unit.unit_type == bc.UnitType.Rocket:
             structure.runRocketLogicMars(unit, workers, workersInformation, gc)
 
-    '''
+    
                               
     return
 
